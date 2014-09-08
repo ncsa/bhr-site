@@ -17,7 +17,7 @@ def is_whitelisted(cidr):
 
 class WhitelistEntry(models.Model):
     cidr = CidrAddressField()
-    who = models.ForeignKey(User, editable=False)
+    who = models.ForeignKey(User)
     why = models.TextField()
     added = models.DateTimeField('date added', auto_now_add=True)
 
@@ -50,7 +50,7 @@ class Block(models.Model):
     )
 
     cidr = CidrAddressField()
-    who  = models.ForeignKey(User, editable=False)
+    who  = models.ForeignKey(User)
     source = models.CharField(max_length=30)
     why  = models.TextField()
 

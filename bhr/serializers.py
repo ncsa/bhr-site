@@ -1,19 +1,19 @@
-from foo.models import WhitelistEntry, BlockEntry
+from bhr.models import WhitelistEntry, Block
 from rest_framework import serializers
 
 class WhitelistEntrySerializer(serializers.ModelSerializer):
-    who = serializers.SlugField(read_only=True)
-    added = serializers.SlugField(read_only=True)
+    who = serializers.SlugField()
+    added = serializers.SlugField()
     class Meta:
         model = WhitelistEntry
         fields = ('cidr', 'who', 'why', 'added')
 
 
-class BlockEntrySerializer(serializers.ModelSerializer):
-    who = serializers.SlugField(read_only=True)
-    added = serializers.SlugField(read_only=True)
+class BlockSerializer(serializers.ModelSerializer):
+    who = serializers.SlugField()
+    added = serializers.SlugField()
     class Meta:
-        model = BlockEntry
+        model = Block
         fields = fields = ('cidr', 'who', 'why', 'added', 'unblock_at', 'skip_whitelist')
 
 class BlockRequestSerializer(serializers.Serializer):
