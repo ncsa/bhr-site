@@ -10,17 +10,15 @@ class WhitelistError(Exception):
 
 def is_whitelisted(cidr):
     for item in WhitelistEntry.objects.all():
-        if cidr in item:
+        if cidr in item.cidr:
             return item
     return False
 
 class WhitelistEntry(models.Model):
     cidr = CidrAddressField()
-    who = models.ForeignKey(User)
+    who = models.ForeignKey(User, editable=False)
     why = models.TextField()
     added = models.DateTimeField('date added', auto_now_add=True)
-
-    objects = NetManager()
 
 FLAG_NONE     = "N"
 FLAG_INBOUND  = "I"
@@ -37,7 +35,7 @@ class BlockEntry(models.Model):
     )
 
     cidr = CidrAddressField()
-    who  = models.ForeignKey(User)
+    who  = models.ForeignKey(User, editable=False)
     source = models.CharField(max_length=30)
     why  = models.TextField()
 
@@ -50,8 +48,6 @@ class BlockEntry(models.Model):
 
     forced_unblock  = models.BooleanField(default=False)
     unblock_why = models.TextField(blank=True)
-
-    objects = NetManager()
 
     def save(self, *args, **kwargs):
         if not self.skip_whitelist:
