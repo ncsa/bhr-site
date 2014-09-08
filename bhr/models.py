@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 
-from netfields import CidrAddressField, NetManager
+from netfields import CidrAddressField
 
 from django.utils import timezone
 
@@ -19,6 +19,11 @@ class WhitelistEntry(models.Model):
     who = models.ForeignKey(User, editable=False)
     why = models.TextField()
     added = models.DateTimeField('date added', auto_now_add=True)
+
+class CurrentBlockManager(models.Manager):
+    def get_queryset(self):
+        return super(CurrentBlockManager, self).get_queryset().filter(
+            block__removed__isnull=True)
 
 FLAG_NONE     = "N"
 FLAG_INBOUND  = "I"
@@ -49,6 +54,9 @@ class BlockEntry(models.Model):
     forced_unblock  = models.BooleanField(default=False)
     unblock_why = models.TextField(blank=True)
 
+    objects = models.Manager()
+    current = CurrentBlockManager()
+
     def save(self, *args, **kwargs):
         if not self.skip_whitelist:
             wle = is_whitelisted(self.cidr)
@@ -61,19 +69,25 @@ class Block(models.Model):
     entry = models.ForeignKey(BlockEntry)
     ident = models.CharField("blocker ident", max_length=50)
 
-    added   = models.DateTimeField('date added')
+    added   = models.DateTimeField('date added', auto_now_add=True)
     removed =  models.DateTimeField('date removed', null=True)
 
     class Meta:
         unique_together = ('entry', 'ident')
 
-class BlockManager(object):
+    def set_unblocked(self):
+        self.removed = timezone.now()
+
+class BHRDB(object):
     def __init__(self):
         pass
 
+    def current(self):
+        return BlockEntry.current
+
     def get_block(self, cidr):
         """Get an existing block record"""
-        BlockEntry.objects
+        return BlockEntry.current.filter(cidr=cidr).first()
 
     def add_block(self, cidr, who, source, why, unblock_at, duration):
         if duration:
@@ -83,3 +97,17 @@ class BlockManager(object):
         b.save()
         return b
 
+    def set_blocked(self, cidr, ident):
+        be = self.get_block(cidr)
+        return be.block_set.create(ident=ident)
+
+    def set_unblocked(self, cidr, ident):
+        be = self.get_block(cidr)
+        b = be.block_set.get(ident=ident)
+        b.set_unblocked()
+        b.save()
+
+    def set_unblocked_by_id(self, block_id):
+        b = Block.objects.get(pk=block_id)
+        b.set_unblocked()
+        b.save()
