@@ -7,3 +7,4 @@ ipaddr==2.1.11
 netaddr==0.7.12
 requests==2.4.0
 wsgiref==0.1.2
+psycopg2==2.5.4

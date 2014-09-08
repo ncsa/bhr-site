@@ -6,7 +6,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get upgrade -y
 
-apt-get install -y postgresql python-psycopg2 python-dev python-pip python-virtualenv
+apt-get install -y postgresql libpq-dev python-dev python-pip python-virtualenv
 
 su postgres -c 'createdb vagrant'
 su postgres -c 'createuser -DRS vagrant'
