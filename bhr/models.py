@@ -51,8 +51,6 @@ class BlockEntry(models.Model):
     forced_unblock  = models.BooleanField(default=False)
     unblock_why = models.TextField(blank=True)
 
-    block_count = models.IntegerField()
-
     objects = NetManager()
 
     def save(self, *args, **kwargs):
