@@ -30,7 +30,7 @@ FLAG_INBOUND  = "I"
 FLAG_OUTBOUND = "O"
 FLAG_BOTH     = "B"
 
-class BlockEntry(models.Model):
+class Block(models.Model):
 
     FLAG_DIRECTIONS = (
         (FLAG_NONE, 'None'),
@@ -62,11 +62,11 @@ class BlockEntry(models.Model):
             wle = is_whitelisted(self.cidr)
             if wle:
                 raise WhitelistError(wle.why)
-        super(BlockEntry, self).save(*args, **kwargs)
+        super(Entry, self).save(*args, **kwargs)
 
 
-class Block(models.Model):
-    entry = models.ForeignKey(BlockEntry)
+class BlockEntry(models.Model):
+    entry = models.ForeignKey(Block)
     ident = models.CharField("blocker ident", max_length=50)
 
     added   = models.DateTimeField('date added', auto_now_add=True)
@@ -83,31 +83,31 @@ class BHRDB(object):
         pass
 
     def current(self):
-        return BlockEntry.current
+        return Block.current
 
     def get_block(self, cidr):
         """Get an existing block record"""
-        return BlockEntry.current.filter(cidr=cidr).first()
+        return Block.current.filter(cidr=cidr).first()
 
     def add_block(self, cidr, who, source, why, unblock_at, duration):
         if duration:
             unblock_at = timezone.now() + datetime.timedelta(seconds=duration)
 
-        b = BlockEntry(cidr=cidr, who=who, source=source, why=why, unblock_at=unblock_at)
+        b = Block(cidr=cidr, who=who, source=source, why=why, unblock_at=unblock_at)
         b.save()
         return b
 
     def set_blocked(self, cidr, ident):
-        be = self.get_block(cidr)
-        return be.block_set.create(ident=ident)
+        b = self.get_block(cidr)
+        return b.blockentry_set.create(ident=ident)
 
     def set_unblocked(self, cidr, ident):
-        be = self.get_block(cidr)
-        b = be.block_set.get(ident=ident)
+        b = self.get_block(cidr)
+        b = b.blockentry_set.get(ident=ident)
         b.set_unblocked()
         b.save()
 
     def set_unblocked_by_id(self, block_id):
-        b = Block.objects.get(pk=block_id)
+        b = BlockEntry.objects.get(pk=block_id)
         b.set_unblocked()
         b.save()

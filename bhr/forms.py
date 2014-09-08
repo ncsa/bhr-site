@@ -2,10 +2,10 @@ from django import forms
 from django.forms import ModelForm
 from bhr.models import is_whitelisted
 
-class BlockEntryForm(ModelForm):
+class BlockForm(ModelForm):
 
     def clean(self):
-        cleaned_data = super(BlockEntryForm, self).clean()
+        cleaned_data = super(BlockForm, self).clean()
         cidr = self.cleaned_data.get('cidr')
         skip_whitelist = self.cleaned_data.get('skip_whitelist')
         if cidr and not skip_whitelist:

@@ -9,7 +9,7 @@ apt-get upgrade -y
 apt-get install -y postgresql libpq-dev python-dev python-pip python-virtualenv
 
 su postgres -c 'createdb vagrant'
-su postgres -c 'createuser -DRS vagrant'
+su postgres -c 'createuser -dRS vagrant'
 
 if [ ! -e env ] ; then
     su vagrant -c 'virtualenv ~/env'

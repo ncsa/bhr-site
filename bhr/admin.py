@@ -1,15 +1,15 @@
 from django.contrib import admin
 
 # Register your models here.
-from bhr.models import WhitelistEntry, BlockEntry
-from bhr.forms import BlockEntryForm
+from bhr.models import WhitelistEntry, Block
+from bhr.forms import BlockForm
 
 class BlockAdmin(admin.ModelAdmin):
     date_hierarchy = 'added'
     list_filter = ('who__username', 'source', 'flag')
     list_display = ('cidr', 'who', 'source')
 
-    form = BlockEntryForm
+    form = BlockForm
 
 class WhitelistAdmin(admin.ModelAdmin):
     date_hierarchy = 'added'
@@ -23,4 +23,4 @@ class WhitelistAdmin(admin.ModelAdmin):
 
 
 admin.site.register(WhitelistEntry, WhitelistAdmin)
-admin.site.register(BlockEntry, BlockAdmin)
+admin.site.register(Block, BlockAdmin)
