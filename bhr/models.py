@@ -23,7 +23,7 @@ class WhitelistEntry(models.Model):
 class CurrentBlockManager(models.Manager):
     def get_queryset(self):
         return super(CurrentBlockManager, self).get_queryset().filter(
-            block__removed__isnull=True)
+            blockentry__removed__isnull=True)
 
 FLAG_NONE     = "N"
 FLAG_INBOUND  = "I"
