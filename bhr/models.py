@@ -34,6 +34,15 @@ class ExpectedBlockManager(models.Manager):
             Q(unblock_at__isnull=True)
         )
 
+class PendingBlockManager(models.Manager):
+    def get_queryset(self):
+        return super(PendingBlockManager, self).get_queryset().filter(
+            Q(unblock_at__gt=timezone.now()) |
+            Q(unblock_at__isnull=True)
+        ).exclude(
+            id__in = BlockEntry.objects.values_list('block_id', flat=True)
+        )
+
 FLAG_NONE     = "N"
 FLAG_INBOUND  = "I"
 FLAG_OUTBOUND = "O"
@@ -66,6 +75,7 @@ class Block(models.Model):
     objects = models.Manager()
     current = CurrentBlockManager()
     expected = ExpectedBlockManager()
+    pending = PendingBlockManager()
 
     def save(self, *args, **kwargs):
         if not self.skip_whitelist:

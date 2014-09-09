@@ -48,6 +48,10 @@ class ExpectedBlockViewset(viewsets.ModelViewSet):
     queryset = Block.expected.all()
     serializer_class = BlockSerializer
 
+class PendingBlockViewset(viewsets.ModelViewSet):
+    queryset = Block.pending.all()
+    serializer_class = BlockSerializer
+
 from rest_framework.views import APIView
 class BlockHistory(generics.ListAPIView):
     serializer_class = BlockSerializer
