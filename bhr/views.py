@@ -14,6 +14,10 @@ class WhitelistViewSet(viewsets.ModelViewSet):
     queryset = WhitelistEntry.objects.all()
     serializer_class = WhitelistEntrySerializer
 
+    def pre_save(self, obj):
+        obj.who = self.request.user
+        return super(WhitelistViewSet, self).pre_save(obj)
+
 class BlockViewset(viewsets.ModelViewSet):
     queryset = Block.objects.all()
     serializer_class = BlockSerializer

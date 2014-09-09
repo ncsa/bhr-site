@@ -2,12 +2,12 @@ from bhr.models import WhitelistEntry, Block
 from rest_framework import serializers
 
 class WhitelistEntrySerializer(serializers.ModelSerializer):
-    who = serializers.SlugField()
-    added = serializers.SlugField()
+    who = serializers.SlugField(read_only=True)
+    added = serializers.SlugField(read_only=True)
+    cidr = serializers.CharField()
     class Meta:
         model = WhitelistEntry
         fields = ('cidr', 'who', 'why', 'added')
-
 
 class BlockSerializer(serializers.HyperlinkedModelSerializer):
     who = serializers.SlugField(read_only=True)
