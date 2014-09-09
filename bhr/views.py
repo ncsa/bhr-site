@@ -29,7 +29,6 @@ class BlockViewset(viewsets.ModelViewSet):
 
     @detail_route(methods=['post'])
     def set_blocked(self, request, pk=None):
-        print 'here!'
         block = self.get_object()
         serializer = SetBlockedSerializer(data=request.DATA)
         if serializer.is_valid():
