@@ -74,7 +74,7 @@ def block(request):
     serializer = BlockRequestSerializer(data=request.DATA)
     if serializer.is_valid():
         b = BHRDB().add_block(who=request.user, **serializer.data)
-        return Response(BlockSerializer(b, context=context).data)
+        return Response(BlockSerializer(b, context=context).data, status=status.HTTP_201_CREATED)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from bhr.models import BHRDB
+from bhr.models import BHRDB, WhitelistEntry
 
 # Create your tests here.
 
@@ -137,3 +137,56 @@ class DBTests(TestCase):
 
         pending = self.db.pending().all()
         self.assertEqual(len(pending), 0)
+
+
+from rest_framework.test import APITestCase
+from rest_framework import status
+
+class ApiTest(TestCase):
+    def setUp(self):
+        self.user = user = User.objects.create_user('admin', 'temporary@gmail.com', 'admin')
+        self.client.login(username='admin', password='admin')
+
+    def _add_block(self, skip_whitelist=0):
+        return self.client.post('/bhr/api/block', dict(
+            cidr='1.2.3.4',
+            source='test',
+            why='testing',
+            duration=30,
+            skip_whitelist=skip_whitelist
+            ))
+
+    def test_block(self):
+        response = self._add_block()
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_block_twice_returns_the_same_block(self):
+        r1 = self._add_block().data
+        r2 = self._add_block().data
+        self.assertEqual(r1['url'], r2['url'])
+
+    def test_block_skip_whitelist(self):
+        WhitelistEntry(who=self.user, why='test', cidr='1.2.3.0/24').save()
+        response = self._add_block()
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        response = self._add_block(skip_whitelist=True)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_block_queue(self):
+        data = self.client.get("/bhr/api/queue/bgp1").data
+        self.assertEqual(len(data), 0)
+        self._add_block()
+
+        data = self.client.get("/bhr/api/queue/bgp1").data
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['cidr'], '1.2.3.4/32')
+
+    def test_add_block(self):
+        self._add_block()
+
+        block = self.client.get("/bhr/api/queue/bgp1").data[0]
+        self.client.post(block['set_blocked'], dict(ident='bgp1'))
+
+        data = self.client.get("/bhr/api/queue/bgp1").data
+        self.assertEqual(len(data), 0)
