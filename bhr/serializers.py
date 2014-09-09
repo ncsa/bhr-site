@@ -27,3 +27,6 @@ class BlockRequestSerializer(serializers.Serializer):
         if attrs.get('duration') and attrs.get('unblock_at'):
             raise serializers.ValidationError("Specify only one of duration and unblock_at")
         return attrs
+
+class SetBlockedSerializer(serializers.Serializer):
+    ident = serializers.CharField()

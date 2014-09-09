@@ -14,7 +14,8 @@ urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'testapp.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
-    url(r'^block', views.block),
-    url(r'^query/(?P<cidr>.+)', views.BlockHistory.as_view()),
     url(r'^api/', include(router.urls)),
+    url(r'^api/block$', views.block),
+    url(r'^api/queue/(?P<ident>.+)', views.BlockQueue.as_view()),
+    url(r'^api/query/(?P<cidr>.+)', views.BlockHistory.as_view()),
 )
