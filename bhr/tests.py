@@ -118,3 +118,22 @@ class DBTests(TestCase):
 
         current = self.db.current().all()
         self.assertEqual(len(current), 1)
+
+    def test_adding_a_block_adds_to_pending(self):
+        pending = self.db.pending().all()
+        self.assertEqual(len(pending), 0)
+
+        b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing')
+        pending = self.db.pending().all()
+        self.assertEqual(len(pending), 1)
+
+    def test_blocking_removes_from_pending(self):
+        b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing')
+
+        pending = self.db.pending().all()
+        self.assertEqual(len(pending), 1)
+
+        self.db.set_blocked('1.2.3.4', 'bgp1')
+
+        pending = self.db.pending().all()
+        self.assertEqual(len(pending), 0)

@@ -108,6 +108,9 @@ class BHRDB(object):
     def expected(self):
         return Block.expected
 
+    def pending(self):
+        return Block.pending
+
     def get_block(self, cidr):
         """Get an existing block record"""
         return Block.expected.filter(cidr=cidr).first()
