@@ -4,7 +4,6 @@ from rest_framework import serializers
 class WhitelistEntrySerializer(serializers.ModelSerializer):
     who = serializers.SlugField(read_only=True)
     added = serializers.SlugField(read_only=True)
-    cidr = serializers.CharField()
     class Meta:
         model = WhitelistEntry
         fields = ('cidr', 'who', 'why', 'added')
