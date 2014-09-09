@@ -115,14 +115,14 @@ class BHRDB(object):
         """Get an existing block record"""
         return Block.expected.filter(cidr=cidr).first()
 
-    def add_block(self, cidr, who, source, why, duration=None, unblock_at=None):
+    def add_block(self, cidr, who, source, why, duration=None, unblock_at=None, skip_whitelist=False):
         b = self.get_block(cidr)
         if b:
             return b
         if duration and not unblock_at:
             unblock_at = timezone.now() + datetime.timedelta(seconds=duration)
 
-        b = Block(cidr=cidr, who=who, source=source, why=why, unblock_at=unblock_at)
+        b = Block(cidr=cidr, who=who, source=source, why=why, unblock_at=unblock_at, skip_whitelist=skip_whitelist)
         b.save()
         return b
 
