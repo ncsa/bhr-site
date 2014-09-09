@@ -141,18 +141,19 @@ class DBTests(TestCase):
 
 from rest_framework.test import APITestCase
 from rest_framework import status
+from time import sleep
 
 class ApiTest(TestCase):
     def setUp(self):
         self.user = user = User.objects.create_user('admin', 'temporary@gmail.com', 'admin')
         self.client.login(username='admin', password='admin')
 
-    def _add_block(self, skip_whitelist=0):
+    def _add_block(self, duration=30, skip_whitelist=0):
         return self.client.post('/bhr/api/block', dict(
             cidr='1.2.3.4',
             source='test',
             why='testing',
-            duration=30,
+            duration=duration,
             skip_whitelist=skip_whitelist
             ))
 
@@ -229,3 +230,22 @@ class ApiTest(TestCase):
 
         data = self.client.get("/bhr/api/current_blocks/").data
         self.assertEqual(data[0]['cidr'], '1.2.3.4/32')
+
+    def test_history(self):
+        hist = self.client.get("/bhr/api/query/1.2.3.4").data
+        self.assertEqual(len(hist), 0)
+        self._add_block()
+
+        hist = self.client.get("/bhr/api/query/1.2.3.4").data
+        self.assertEqual(len(hist), 1)
+
+
+    def test_history_multiple(self):
+        hist = self.client.get("/bhr/api/query/1.2.3.4").data
+        self.assertEqual(len(hist), 0)
+        self._add_block(duration=1)
+        sleep(2)
+        self._add_block(duration=1)
+
+        hist = self.client.get("/bhr/api/query/1.2.3.4").data
+        self.assertEqual(len(hist), 2)
