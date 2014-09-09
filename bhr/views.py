@@ -23,11 +23,13 @@ class BlockViewset(viewsets.ModelViewSet):
         obj.who = self.request.user
         return super(BlockSerializer, self).pre_save(obj)
 
-    @list_route(methods=['get'])
-    def current(self, request):
-        current_blocks = Block.objects.filter(Q(unblock_at__gt=timezone.now())| Q(unblock_at__isnull=True))
-        ser = BlockSerializer(current_blocks, many=True)
-        return Response(ser.data)
+class CurrentBlockViewset(viewsets.ModelViewSet):
+    queryset = Block.current.all()
+    serializer_class = BlockSerializer
+
+class ExpectedBlockViewset(viewsets.ModelViewSet):
+    queryset = Block.expected.all()
+    serializer_class = BlockSerializer
 
 from rest_framework.views import APIView
 class BlockHistory(generics.ListAPIView):
@@ -41,10 +43,11 @@ from rest_framework.response import Response
 
 @api_view(["POST"])
 def block(request):
+    context = {"request": request}
     print 'request is', repr(request.DATA)
     serializer = BlockRequestSerializer(data=request.DATA)
     if serializer.is_valid():
         b = BHRDB().add_block(who=request.user, **serializer.data)
-        return Response(BlockSerializer(b).data)
+        return Response(BlockSerializer(b, context=context).data)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

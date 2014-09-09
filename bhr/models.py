@@ -5,6 +5,7 @@ from django.db.models import Q
 from netfields import CidrAddressField
 
 from django.utils import timezone
+import datetime
 
 class WhitelistError(Exception):
     pass
