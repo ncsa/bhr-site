@@ -109,3 +109,12 @@ class DBTests(TestCase):
 
         q = self.db.block_queue('bgp2')
         self.assertEqual(len(q), 1)
+
+    def test_block_two_blockers_doesnt_double_current(self):
+        b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing')
+
+        self.db.set_blocked('1.2.3.4', 'bgp1')
+        self.db.set_blocked('1.2.3.4', 'bgp2')
+
+        current = self.db.current().all()
+        self.assertEqual(len(current), 1)
