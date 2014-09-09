@@ -11,9 +11,10 @@ class WhitelistEntrySerializer(serializers.ModelSerializer):
 class BlockSerializer(serializers.HyperlinkedModelSerializer):
     who = serializers.SlugField(read_only=True)
     added = serializers.SlugField(read_only=True)
+    set_blocked = serializers.HyperlinkedIdentityField(view_name='block-set-blocked', lookup_field='pk')
     class Meta:
         model = Block
-        fields = fields = ('url', 'cidr', 'why', 'added', 'unblock_at', 'skip_whitelist')
+        fields = fields = ('url', 'cidr', 'why', 'added', 'unblock_at', 'skip_whitelist', 'set_blocked')
 
 class BlockRequestSerializer(serializers.Serializer):
     cidr = serializers.CharField(max_length=20)
