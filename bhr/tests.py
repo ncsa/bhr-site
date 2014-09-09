@@ -182,7 +182,7 @@ class ApiTest(TestCase):
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]['cidr'], '1.2.3.4/32')
 
-    def test_add_block(self):
+    def test_set_blocked(self):
         self._add_block()
 
         block = self.client.get("/bhr/api/queue/bgp1").data[0]
@@ -190,3 +190,42 @@ class ApiTest(TestCase):
 
         data = self.client.get("/bhr/api/queue/bgp1").data
         self.assertEqual(len(data), 0)
+
+    def test_block_queue_with_two_blockers(self):
+        self._add_block()
+
+        block = self.client.get("/bhr/api/queue/bgp1").data[0]
+        self.client.post(block['set_blocked'], dict(ident='bgp1'))
+
+        block = self.client.get("/bhr/api/queue/bgp2").data[0]
+        self.client.post(block['set_blocked'], dict(ident='bgp2'))
+
+        for ident in 'bgp1', 'bgp2':
+            data = self.client.get("/bhr/api/queue/" + ident).data
+            self.assertEqual(len(data), 0)
+
+    def test_pending_blocks(self):
+        self._add_block()
+
+        block = self.client.get("/bhr/api/queue/bgp1").data[0]
+
+        data = self.client.get("/bhr/api/pending_blocks/").data
+        self.assertEqual(data[0]['cidr'], '1.2.3.4/32')
+
+        self.client.post(block['set_blocked'], dict(ident='bgp1'))
+
+        data = self.client.get("/bhr/api/pending_blocks/").data
+        self.assertEqual(len(data), 0)
+
+    def test_current_blocks(self):
+        self._add_block()
+
+        block = self.client.get("/bhr/api/queue/bgp1").data[0]
+
+        data = self.client.get("/bhr/api/current_blocks/").data
+        self.assertEqual(len(data), 0)
+
+        self.client.post(block['set_blocked'], dict(ident='bgp1'))
+
+        data = self.client.get("/bhr/api/current_blocks/").data
+        self.assertEqual(data[0]['cidr'], '1.2.3.4/32')
