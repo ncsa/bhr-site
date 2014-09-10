@@ -25,7 +25,7 @@ class BlockViewset(viewsets.ModelViewSet):
     def pre_save(self, obj):
         """Force who to the current user on save"""
         obj.who = self.request.user
-        return super(BlockSerializer, self).pre_save(obj)
+        return super(BlockViewset, self).pre_save(obj)
 
     @detail_route(methods=['post'])
     def set_blocked(self, request, pk=None):
