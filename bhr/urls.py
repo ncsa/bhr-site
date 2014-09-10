@@ -11,6 +11,7 @@ router.register(r'blockentries', views.BlockEntryViewset)
 router.register(r'current_blocks', views.CurrentBlockViewset, 'current_blocks')
 router.register(r'expected_blocks', views.ExpectedBlockViewset, 'expected_blocks')
 router.register(r'pending_blocks', views.PendingBlockViewset, 'pending_blocks')
+router.register(r'current_blocks_brief', views.CurrentBlockBriefViewset, 'current_blocks_brief')
 
 urlpatterns = patterns('',
     # Examples:

@@ -75,9 +75,9 @@ class Block(models.Model):
         (FLAG_BOTH, 'Both'),
     )
 
-    cidr = CidrAddressField()
+    cidr = CidrAddressField(db_index=True)
     who  = models.ForeignKey(User)
-    source = models.CharField(max_length=30)
+    source = models.CharField(max_length=30, db_index=True)
     why  = models.TextField()
 
     added = models.DateTimeField('date added', auto_now_add=True)

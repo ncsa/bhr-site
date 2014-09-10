@@ -1,6 +1,11 @@
 from rest_framework import viewsets
 from bhr.models import WhitelistEntry, Block, BlockEntry, BHRDB
-from bhr.serializers import WhitelistEntrySerializer, BlockSerializer, BlockRequestSerializer, SetBlockedSerializer, BlockEntrySerializer
+from bhr.serializers import (WhitelistEntrySerializer,
+    BlockSerializer, BlockBriefSerializer,
+    BlockEntrySerializer,
+    SetBlockedSerializer,
+    BlockRequestSerializer,
+)
 from rest_framework import status
 from rest_framework import generics
 from rest_framework.decorators import api_view
@@ -54,6 +59,9 @@ class CurrentBlockViewset(viewsets.ModelViewSet):
     serializer_class = BlockSerializer
     def get_queryset(self):
         return Block.current.all()
+
+class CurrentBlockBriefViewset(CurrentBlockViewset):
+    serializer_class = BlockBriefSerializer
 
 class ExpectedBlockViewset(viewsets.ModelViewSet):
     serializer_class = BlockSerializer
