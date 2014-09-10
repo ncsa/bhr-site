@@ -66,6 +66,13 @@ class BlockQueue(generics.ListAPIView):
         ident = self.kwargs['ident']
         return BHRDB().block_queue(ident)
 
+class UnBlockQueue(generics.ListAPIView):
+    serializer_class = BlockSerializer
+
+    def get_queryset(self):
+        ident = self.kwargs['ident']
+        return BHRDB().unblock_queue(ident)
+
 from rest_framework.response import Response
 
 @api_view(["POST"])

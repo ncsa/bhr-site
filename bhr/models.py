@@ -40,7 +40,23 @@ class PendingBlockManager(models.Manager):
             Q(unblock_at__gt=timezone.now()) |
             Q(unblock_at__isnull=True)
         ).exclude(
+            forced_unblock=False,
             id__in = BlockEntry.objects.values_list('block_id', flat=True)
+        )
+class PendingRemovalBlockManager(models.Manager):
+    def get_queryset(self):
+        return super(PendingRemovalBlockManager, self).get_queryset().filter(
+            Q(unblock_at__lt=timezone.now()) |
+            Q(forced_unblock=True)
+        ).filter(
+            id__in = BlockEntry.objects.values_list('block_id', flat=True)
+        )
+
+class ExpiredBlockManager(models.Manager):
+    def get_queryset(self):
+        return super(ExpiredBlockManager, self).get_queryset().filter(
+            Q(unblock_at__lt=timezone.now()) |
+            Q(forced_unblock=True)
         )
 
 FLAG_NONE     = "N"
@@ -76,6 +92,8 @@ class Block(models.Model):
     current = CurrentBlockManager()
     expected = ExpectedBlockManager()
     pending = PendingBlockManager()
+    pending_removal = PendingRemovalBlockManager()
+    expired = ExpiredBlockManager()
 
     def save(self, *args, **kwargs):
         if not self.skip_whitelist:
@@ -111,6 +129,12 @@ class BHRDB(object):
     def pending(self):
         return Block.pending
 
+    def pending_removal(self):
+        return Block.pending_removal
+
+    def expired(self):
+        return Block.expired
+
     def get_block(self, cidr):
         """Get an existing block record"""
         return Block.expected.filter(cidr=cidr).first()
@@ -125,6 +149,15 @@ class BHRDB(object):
         b = Block(cidr=cidr, who=who, source=source, why=why, unblock_at=unblock_at, skip_whitelist=skip_whitelist)
         b.save()
         return b
+
+    def unblock_now(self, cidr, why):
+        b = self.get_block(cidr)
+        if not b:
+            raise Exception("%s is not blocked" % cidr)
+
+        b.forced_unblock = True
+        b.unblock_why = why
+        b.save()
 
     def set_blocked(self, cidr, ident):
         b = self.get_block(cidr)
@@ -144,3 +177,7 @@ class BHRDB(object):
     def block_queue(self, ident):
         return self.expected().exclude(
             id__in = BlockEntry.objects.filter(ident=ident).values_list('block_id', flat=True))
+
+    def unblock_queue(self, ident):
+        return self.expired().filter(
+            id__in = BlockEntry.objects.filter(removed__isnull=True, ident=ident).values_list('block_id', flat=True))

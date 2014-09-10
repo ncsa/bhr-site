@@ -138,6 +138,66 @@ class DBTests(TestCase):
         pending = self.db.pending().all()
         self.assertEqual(len(pending), 0)
 
+    def test_unblock_now_removes_from_expected(self):
+        b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing')
+
+        expected = self.db.expected().all()
+        self.assertEqual(len(expected), 1)
+
+        self.db.unblock_now('1.2.3.4', 'testing')
+
+        expected = self.db.expected().all()
+        self.assertEqual(len(expected), 1)
+
+    def test_unblock_now_moves_to_pending_removal(self):
+        b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing')
+        self.db.unblock_now('1.2.3.4', 'testing')
+
+        #it needs to be blocked on a host to be able to be pending unblock
+        self.db.set_blocked('1.2.3.4', 'bgp1')
+
+        pending_removal = self.db.pending_removal().all()
+        self.assertEqual(len(pending_removal), 1)
+
+    def test_unblock_queue_empty(self):
+        q = self.db.unblock_queue('bgp1')
+        self.assertEqual(len(q), 0)
+
+    def test_unblock_queue_empty_before_expiration(self):
+        b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing', duration=30)
+        self.db.set_blocked('1.2.3.4', 'bgp1')
+
+        q = self.db.unblock_queue('bgp1')
+        self.assertEqual(len(q), 0)
+
+    def test_unblock_now_adds_to_unblock_queue(self):
+        b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing', duration=1)
+        self.db.set_blocked('1.2.3.4', 'bgp1')
+
+        self.db.unblock_now('1.2.3.4', 'testing')
+
+        q = self.db.unblock_queue('bgp1')
+        self.assertEqual(len(q), 1)
+
+    def test_unblock_queue_exists_after_expiration(self):
+        b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing', duration=1)
+        self.db.set_blocked('1.2.3.4', 'bgp1')
+        sleep(2)
+        q = self.db.unblock_queue('bgp1')
+        self.assertEqual(len(q), 1)
+
+    def test_set_unblocked_removes_from_unblock_queue(self):
+        b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing')
+        self.db.set_blocked('1.2.3.4', 'bgp1')
+        self.db.unblock_now('1.2.3.4', 'testing')
+
+        q = self.db.unblock_queue('bgp1')
+        self.assertEqual(len(q), 1)
+
+        self.db.set_unblocked('1.2.3.4', 'bgp1')
+
+        q = self.db.unblock_queue('bgp1')
+        self.assertEqual(len(q), 0)
 
 from rest_framework.test import APITestCase
 from rest_framework import status
@@ -180,6 +240,17 @@ class ApiTest(TestCase):
         self._add_block()
 
         data = self.client.get("/bhr/api/queue/bgp1").data
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['cidr'], '1.2.3.4/32')
+
+    def test_unblock_queue(self):
+        data = self.client.get("/bhr/api/unblock_queue/bgp1").data
+        self.assertEqual(len(data), 0)
+        block = self._add_block(duration=1).data
+        self.client.post(block['set_blocked'], dict(ident='bgp1'))
+        sleep(2)
+
+        data = self.client.get("/bhr/api/unblock_queue/bgp1").data
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]['cidr'], '1.2.3.4/32')
 
