@@ -369,3 +369,17 @@ class ApiTest(TestCase):
         #now we should have some unblock queue entries
         q = self.client.get("/bhr/api/unblock_queue/bgp1").data
         self.assertEqual(len(q), 1)
+
+        #unblock it
+
+        self.client.post(q[0]['set_unblocked'])
+
+        #we should still have 1 current block
+        check_counts(pending=0, current=1, expected=0)
+
+        #do the unblock for bgp2
+        q = self.client.get("/bhr/api/unblock_queue/bgp2").data
+        self.client.post(q[0]['set_unblocked'])
+
+        #now we should have 0 blocks
+        check_counts(pending=0, current=0, expected=0)
