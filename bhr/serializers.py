@@ -1,4 +1,4 @@
-from bhr.models import WhitelistEntry, Block
+from bhr.models import WhitelistEntry, Block, BlockEntry
 from rest_framework import serializers
 from bhr.models import is_whitelisted
 
@@ -16,6 +16,12 @@ class BlockSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Block
         fields = fields = ('url', 'cidr', 'source', 'why', 'added', 'unblock_at', 'skip_whitelist', 'set_blocked')
+
+class BlockEntrySerializer(serializers.HyperlinkedModelSerializer):
+    block = BlockSerializer()
+    class Meta:
+        model = BlockEntry
+        fields = ('block', 'ident', 'added', 'removed')
 
 class BlockRequestSerializer(serializers.Serializer):
     cidr = serializers.CharField(max_length=20)

@@ -32,6 +32,8 @@ class ExpectedBlockManager(models.Manager):
         return super(ExpectedBlockManager, self).get_queryset().filter(
             Q(unblock_at__gt=timezone.now()) |
             Q(unblock_at__isnull=True)
+        ).exclude(
+            forced_unblock=True,
         )
 
 class PendingBlockManager(models.Manager):
@@ -49,7 +51,7 @@ class PendingRemovalBlockManager(models.Manager):
             Q(unblock_at__lt=timezone.now()) |
             Q(forced_unblock=True)
         ).filter(
-            id__in = BlockEntry.objects.values_list('block_id', flat=True)
+            id__in = BlockEntry.objects.filter(removed__isnull=True).values_list('block_id', flat=True)
         )
 
 class ExpiredBlockManager(models.Manager):
@@ -159,17 +161,15 @@ class BHRDB(object):
         b.unblock_why = why
         b.save()
 
-    def set_blocked(self, cidr, ident):
-        b = self.get_block(cidr)
+    def set_blocked(self, b, ident):
         return b.blockentry_set.create(ident=ident)
 
-    def set_unblocked(self, cidr, ident):
-        b = self.get_block(cidr)
+    def set_unblocked(self, b, ident):
         b = b.blockentry_set.get(ident=ident)
         b.set_unblocked()
         b.save()
 
-    def set_unblocked_by_id(self, block_id):
+    def set_unblocked_by_blockentry_id(self, block_id):
         b = BlockEntry.objects.get(pk=block_id)
         b.set_unblocked()
         b.save()
@@ -179,5 +179,5 @@ class BHRDB(object):
             id__in = BlockEntry.objects.filter(ident=ident).values_list('block_id', flat=True))
 
     def unblock_queue(self, ident):
-        return self.expired().filter(
-            id__in = BlockEntry.objects.filter(removed__isnull=True, ident=ident).values_list('block_id', flat=True))
+        return BlockEntry.objects.filter(removed__isnull=True, ident=ident).filter(
+            block_id__in = self.expired().values_list('id', flat=True))

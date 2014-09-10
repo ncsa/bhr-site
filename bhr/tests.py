@@ -46,19 +46,19 @@ class DBTests(TestCase):
         self.assertEqual(len(current), 0)
 
         b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing')
-        self.db.set_blocked('1.2.3.4', 'bgp1')
+        self.db.set_blocked(b1, 'bgp1')
 
         current = self.db.current().all()
         self.assertEqual(len(current), 1)
 
     def test_block_then_unblock_changes_current_but_not_expected(self):
         b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing')
-        self.db.set_blocked('1.2.3.4', 'bgp1')
+        self.db.set_blocked(b1, 'bgp1')
 
         current = self.db.current().all()
         self.assertEqual(len(current), 1)
 
-        self.db.set_unblocked('1.2.3.4', 'bgp1')
+        self.db.set_unblocked(b1, 'bgp1')
 
         current = self.db.current().all()
         self.assertEqual(len(current), 0)
@@ -78,7 +78,7 @@ class DBTests(TestCase):
         self.assertEqual(len(q), 1)
         self.assertEqual(str(q[0].cidr), '1.2.3.4/32')
 
-        self.db.set_blocked('1.2.3.4', 'bgp1')
+        self.db.set_blocked(b1, 'bgp1')
 
         q = self.db.block_queue('bgp1')
 
@@ -92,8 +92,8 @@ class DBTests(TestCase):
             self.assertEqual(len(q), 1)
             self.assertEqual(str(q[0].cidr), '1.2.3.4/32')
 
-        self.db.set_blocked('1.2.3.4', 'bgp1')
-        self.db.set_blocked('1.2.3.4', 'bgp2')
+        self.db.set_blocked(b1, 'bgp1')
+        self.db.set_blocked(b1, 'bgp2')
 
         for ident in 'bgp1', 'bgp2':
             q = self.db.block_queue(ident)
@@ -102,7 +102,7 @@ class DBTests(TestCase):
     def test_block_two_blockers_only_one(self):
         b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing')
 
-        self.db.set_blocked('1.2.3.4', 'bgp1')
+        self.db.set_blocked(b1, 'bgp1')
 
         q = self.db.block_queue('bgp1')
         self.assertEqual(len(q), 0)
@@ -113,8 +113,8 @@ class DBTests(TestCase):
     def test_block_two_blockers_doesnt_double_current(self):
         b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing')
 
-        self.db.set_blocked('1.2.3.4', 'bgp1')
-        self.db.set_blocked('1.2.3.4', 'bgp2')
+        self.db.set_blocked(b1, 'bgp1')
+        self.db.set_blocked(b1, 'bgp2')
 
         current = self.db.current().all()
         self.assertEqual(len(current), 1)
@@ -133,7 +133,7 @@ class DBTests(TestCase):
         pending = self.db.pending().all()
         self.assertEqual(len(pending), 1)
 
-        self.db.set_blocked('1.2.3.4', 'bgp1')
+        self.db.set_blocked(b1, 'bgp1')
 
         pending = self.db.pending().all()
         self.assertEqual(len(pending), 0)
@@ -147,14 +147,14 @@ class DBTests(TestCase):
         self.db.unblock_now('1.2.3.4', 'testing')
 
         expected = self.db.expected().all()
-        self.assertEqual(len(expected), 1)
+        self.assertEqual(len(expected), 0)
 
     def test_unblock_now_moves_to_pending_removal(self):
         b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing')
         self.db.unblock_now('1.2.3.4', 'testing')
 
         #it needs to be blocked on a host to be able to be pending unblock
-        self.db.set_blocked('1.2.3.4', 'bgp1')
+        self.db.set_blocked(b1, 'bgp1')
 
         pending_removal = self.db.pending_removal().all()
         self.assertEqual(len(pending_removal), 1)
@@ -165,14 +165,14 @@ class DBTests(TestCase):
 
     def test_unblock_queue_empty_before_expiration(self):
         b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing', duration=30)
-        self.db.set_blocked('1.2.3.4', 'bgp1')
+        self.db.set_blocked(b1, 'bgp1')
 
         q = self.db.unblock_queue('bgp1')
         self.assertEqual(len(q), 0)
 
     def test_unblock_now_adds_to_unblock_queue(self):
         b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing', duration=1)
-        self.db.set_blocked('1.2.3.4', 'bgp1')
+        self.db.set_blocked(b1, 'bgp1')
 
         self.db.unblock_now('1.2.3.4', 'testing')
 
@@ -181,20 +181,20 @@ class DBTests(TestCase):
 
     def test_unblock_queue_exists_after_expiration(self):
         b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing', duration=1)
-        self.db.set_blocked('1.2.3.4', 'bgp1')
+        self.db.set_blocked(b1, 'bgp1')
         sleep(2)
         q = self.db.unblock_queue('bgp1')
         self.assertEqual(len(q), 1)
 
     def test_set_unblocked_removes_from_unblock_queue(self):
         b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing')
-        self.db.set_blocked('1.2.3.4', 'bgp1')
+        self.db.set_blocked(b1, 'bgp1')
         self.db.unblock_now('1.2.3.4', 'testing')
 
         q = self.db.unblock_queue('bgp1')
         self.assertEqual(len(q), 1)
 
-        self.db.set_unblocked('1.2.3.4', 'bgp1')
+        self.db.set_unblocked(b1, 'bgp1')
 
         q = self.db.unblock_queue('bgp1')
         self.assertEqual(len(q), 0)
@@ -252,7 +252,8 @@ class ApiTest(TestCase):
 
         data = self.client.get("/bhr/api/unblock_queue/bgp1").data
         self.assertEqual(len(data), 1)
-        self.assertEqual(data[0]['cidr'], '1.2.3.4/32')
+        print data
+        self.assertEqual(data[0]['block']['cidr'], '1.2.3.4/32')
 
     def test_set_blocked(self):
         self._add_block()
@@ -320,3 +321,52 @@ class ApiTest(TestCase):
 
         hist = self.client.get("/bhr/api/query/1.2.3.4").data
         self.assertEqual(len(hist), 2)
+
+    def test_all_in_one(self):
+        """Test everything.  Not so useful if things fail, but useful to see how things work"""
+
+        def check(which, cnt):
+            data = self.client.get("/bhr/api/%s_blocks/" % which).data
+            self.assertEqual(len(data), cnt, which)
+
+        def check_counts(pending=0, current=0, expected=0):
+            check("pending", pending)
+            check("current", current)
+            check("expected", expected)
+
+        # at first, there is noting pending or blocked, and no queue.
+        check_counts(0)
+
+        #add a single block that expires in 10 seconds
+        self._add_block(duration=3)
+
+        #verify that it shows up in expected
+        check_counts(pending=1, expected=1)
+
+        # find and block this using bgp1
+        block = self.client.get("/bhr/api/queue/bgp1").data[0]
+        self.client.post(block['set_blocked'], dict(ident='bgp1'))
+
+        check_counts(pending=0, current=1, expected=1)
+
+        q = self.client.get("/bhr/api/queue/bgp1").data
+        self.assertEqual(len(q), 0, "now that it's blocked, there should be no queue for bgp1")
+
+        q = self.client.get("/bhr/api/queue/bgp2").data
+        self.assertEqual(len(q), 1, "but there should be a queue entry for bgp2")
+
+        # block it via bgp2
+        block = self.client.get("/bhr/api/queue/bgp2").data[0]
+        self.client.post(block['set_blocked'], dict(ident='bgp2'))
+
+        check_counts(pending=0, current=1, expected=1)
+
+        #now, wait 6 seconds, and see what's up
+
+        sleep(6)
+
+        check_counts(pending=0, current=1, expected=0)
+
+        #now we should have some unblock queue entries
+        q = self.client.get("/bhr/api/unblock_queue/bgp1").data
+        self.assertEqual(len(q), 1)
