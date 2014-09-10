@@ -15,7 +15,7 @@ class BlockSerializer(serializers.HyperlinkedModelSerializer):
     set_blocked = serializers.HyperlinkedIdentityField(view_name='block-set-blocked', lookup_field='pk')
     class Meta:
         model = Block
-        fields = fields = ('url', 'cidr', 'source', 'why', 'added', 'unblock_at', 'skip_whitelist', 'set_blocked')
+        fields = fields = ('who', 'url', 'cidr', 'source', 'why', 'added', 'unblock_at', 'skip_whitelist', 'set_blocked')
 
 class BlockEntrySerializer(serializers.HyperlinkedModelSerializer):
     block = BlockSerializer()
