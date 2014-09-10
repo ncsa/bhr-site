@@ -40,16 +40,19 @@ class BlockViewset(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST)
 
 class CurrentBlockViewset(viewsets.ModelViewSet):
-    queryset = Block.current.all()
     serializer_class = BlockSerializer
+    def get_queryset(self):
+        return Block.current.all()
 
 class ExpectedBlockViewset(viewsets.ModelViewSet):
-    queryset = Block.expected.all()
     serializer_class = BlockSerializer
+    def get_queryset(self):
+        return Block.expected.all()
 
 class PendingBlockViewset(viewsets.ModelViewSet):
-    queryset = Block.pending.all()
     serializer_class = BlockSerializer
+    def get_queryset(self):
+        return Block.pending.all()
 
 from rest_framework.views import APIView
 class BlockHistory(generics.ListAPIView):
