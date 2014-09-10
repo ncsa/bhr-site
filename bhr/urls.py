@@ -7,6 +7,7 @@ from bhr import views
 router = routers.DefaultRouter()
 router.register(r'whitelist', views.WhitelistViewSet)
 router.register(r'blocks', views.BlockViewset)
+router.register(r'blockentries', views.BlockEntryViewset)
 router.register(r'current_blocks', views.CurrentBlockViewset, 'current_blocks')
 router.register(r'expected_blocks', views.ExpectedBlockViewset, 'expected_blocks')
 router.register(r'pending_blocks', views.PendingBlockViewset, 'pending_blocks')

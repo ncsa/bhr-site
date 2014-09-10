@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from bhr.models import WhitelistEntry, Block, BHRDB
+from bhr.models import WhitelistEntry, Block, BlockEntry, BHRDB
 from bhr.serializers import WhitelistEntrySerializer, BlockSerializer, BlockRequestSerializer, SetBlockedSerializer, BlockEntrySerializer
 from rest_framework import status
 from rest_framework import generics
@@ -17,6 +17,17 @@ class WhitelistViewSet(viewsets.ModelViewSet):
     def pre_save(self, obj):
         obj.who = self.request.user
         return super(WhitelistViewSet, self).pre_save(obj)
+
+class BlockEntryViewset(viewsets.ModelViewSet):
+    queryset = BlockEntry.objects.all()
+    serializer_class = BlockEntrySerializer
+
+    @detail_route(methods=['post'])
+    def set_unblocked(self, request, pk=None):
+        entry = self.get_object()
+        entry.set_unblocked()
+        entry.save()
+        return Response({'status': 'ok'})
 
 class BlockViewset(viewsets.ModelViewSet):
     queryset = Block.objects.all()
