@@ -383,3 +383,14 @@ class ApiTest(TestCase):
 
         #now we should have 0 blocks
         check_counts(pending=0, current=0, expected=0)
+
+        #make sure there is nothing in the block or unblock queue for bgp1 bgp2.
+        q = self.client.get("/bhr/api/queue/bgp1").data
+        self.assertEqual(len(q), 0, "there should be no queue for bgp1")
+        q = self.client.get("/bhr/api/unblock_queue/bgp1").data
+        self.assertEqual(len(q), 0, "there should be no unblock queue for bgp1")
+
+        q = self.client.get("/bhr/api/queue/bgp2").data
+        self.assertEqual(len(q), 0, "there should be no queue for bgp2")
+        q = self.client.get("/bhr/api/unblock_queue/bgp2").data
+        self.assertEqual(len(q), 0, "there should be no unblock queue for bgp2")
