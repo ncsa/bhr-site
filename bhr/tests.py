@@ -252,7 +252,6 @@ class ApiTest(TestCase):
 
         data = self.client.get("/bhr/api/unblock_queue/bgp1").data
         self.assertEqual(len(data), 1)
-        print data
         self.assertEqual(data[0]['block']['cidr'], '1.2.3.4/32')
 
     def test_set_blocked(self):
