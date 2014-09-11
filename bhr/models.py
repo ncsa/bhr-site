@@ -176,8 +176,19 @@ class BHRDB(object):
         b.save()
 
     def block_queue(self, ident):
-        return self.expected().exclude(
-            id__in = BlockEntry.objects.filter(removed__isnull=True, ident=ident).values_list('block_id', flat=True))
+        return list(Block.objects.raw("""
+            SELECT b.id as pk, * from bhr_block b
+            LEFT JOIN bhr_blockentry be
+            ON b.id=be.block_id AND be.ident = %s
+            WHERE
+                (b.unblock_at IS NULL OR
+                 b.unblock_at > %s)
+            AND
+                b.forced_unblock is false
+            AND
+                be.added IS NULL""",
+            [ident, timezone.now()]
+        ))
 
     def unblock_queue(self, ident):
         return BlockEntry.objects.filter(removed__isnull=True, ident=ident).filter(
