@@ -81,13 +81,13 @@ class Block(models.Model):
     why  = models.TextField()
 
     added = models.DateTimeField('date added', auto_now_add=True)
-    unblock_at = models.DateTimeField('date to be unblocked', null=True)
+    unblock_at = models.DateTimeField('date to be unblocked', null=True, db_index=True)
 
     flag = models.CharField(max_length=1, choices=FLAG_DIRECTIONS, default=FLAG_NONE)
 
     skip_whitelist = models.BooleanField(default=False)
 
-    forced_unblock  = models.BooleanField(default=False)
+    forced_unblock  = models.BooleanField(default=False, db_index=True)
     unblock_why = models.TextField(blank=True)
 
     objects = models.Manager()
@@ -107,10 +107,10 @@ class Block(models.Model):
 
 class BlockEntry(models.Model):
     block = models.ForeignKey(Block)
-    ident = models.CharField("blocker ident", max_length=50)
+    ident = models.CharField("blocker ident", max_length=50, db_index=True)
 
     added   = models.DateTimeField('date added', auto_now_add=True)
-    removed =  models.DateTimeField('date removed', null=True)
+    removed =  models.DateTimeField('date removed', null=True, db_index=True)
 
     class Meta:
         unique_together = ('block', 'ident')
