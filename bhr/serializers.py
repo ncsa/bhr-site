@@ -11,7 +11,6 @@ class WhitelistEntrySerializer(serializers.ModelSerializer):
 
 class BlockSerializer(serializers.HyperlinkedModelSerializer):
     who = serializers.SlugField(read_only=True)
-    added = serializers.SlugField(read_only=True)
     set_blocked = serializers.HyperlinkedIdentityField(view_name='block-set-blocked', lookup_field='pk')
     class Meta:
         model = Block
@@ -22,6 +21,12 @@ class BlockBriefSerializer(serializers.ModelSerializer):
     class Meta:
         model = Block
         fields = ('cidr', )
+
+class BlockQueueSerializer(serializers.ModelSerializer):
+    set_blocked = serializers.HyperlinkedIdentityField(view_name='block-set-blocked', lookup_field='pk')
+    class Meta:
+        model = Block
+        fields = ('cidr', 'set_blocked')
 
 class BlockEntrySerializer(serializers.HyperlinkedModelSerializer):
     block = BlockBriefSerializer()

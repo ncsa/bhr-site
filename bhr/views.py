@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from bhr.models import WhitelistEntry, Block, BlockEntry, BHRDB
 from bhr.serializers import (WhitelistEntrySerializer,
-    BlockSerializer, BlockBriefSerializer,
+    BlockSerializer, BlockBriefSerializer, BlockQueueSerializer,
     BlockEntrySerializer, UnBlockEntrySerializer,
     SetBlockedSerializer,
     BlockRequestSerializer,
@@ -90,11 +90,11 @@ class BlockHistory(generics.ListAPIView):
         return Block.objects.filter(cidr=cidr).select_related('who')
 
 class BlockQueue(generics.ListAPIView):
-    serializer_class = BlockSerializer
+    serializer_class = BlockQueueSerializer
 
     def get_queryset(self):
         ident = self.kwargs['ident']
-        return BHRDB().block_queue(ident)[:100]
+        return BHRDB().block_queue(ident, limit=100)
 
 class UnBlockQueue(generics.ListAPIView):
     serializer_class = UnBlockEntrySerializer
