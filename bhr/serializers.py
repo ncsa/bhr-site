@@ -21,7 +21,7 @@ class BlockBriefSerializer(serializers.ModelSerializer):
     who = serializers.SlugField(read_only=True)
     class Meta:
         model = Block
-        fields = ('cidr', 'who', 'source', 'why')
+        fields = ('cidr', )
 
 class BlockEntrySerializer(serializers.HyperlinkedModelSerializer):
     block = BlockBriefSerializer()
