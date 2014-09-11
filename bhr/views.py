@@ -112,9 +112,21 @@ def block(request):
     if serializer.is_valid():
         b = BHRDB().add_block(who=request.user, **serializer.data)
         return Response(BlockSerializer(b, context=context).data, status=status.HTTP_201_CREATED)
-    else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["POST"])
+def mblock(request):
+    context = {"request": request}
+    serializer = BlockRequestSerializer(data=request.DATA, many=True)
+    created = []
+    if serializer.is_valid():
+        for block in serializer.data:
+            b = BHRDB().add_block(who=request.user, **block)
+            created.append(b)
+        return Response(BlockSerializer(created, many=True, context=context).data, status=status.HTTP_201_CREATED)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 from bhr.util import respond_csv
 @api_view(["GET"])
