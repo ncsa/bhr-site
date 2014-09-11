@@ -42,8 +42,9 @@ class PendingBlockManager(models.Manager):
             Q(unblock_at__gt=timezone.now()) |
             Q(unblock_at__isnull=True)
         ).exclude(
-            forced_unblock=False,
-            id__in = BlockEntry.objects.filter(removed__isnull=True).values_list('block_id', flat=True)
+            forced_unblock=True,
+        ).exclude(
+            id__in = BlockEntry.objects.distinct('block_id').filter(removed__isnull=True).values_list('block_id', flat=True)
         )
 class PendingRemovalBlockManager(models.Manager):
     def get_queryset(self):
@@ -51,7 +52,7 @@ class PendingRemovalBlockManager(models.Manager):
             Q(unblock_at__lt=timezone.now()) |
             Q(forced_unblock=True)
         ).filter(
-            id__in = BlockEntry.objects.filter(removed__isnull=True).values_list('block_id', flat=True)
+            id__in = BlockEntry.objects.distinct('block_id').filter(removed__isnull=True).values_list('block_id', flat=True)
         )
 
 class ExpiredBlockManager(models.Manager):
