@@ -55,7 +55,7 @@ class BlockViewset(viewsets.ModelViewSet):
             return Response(serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST)
 
-class CurrentBlockViewset(viewsets.ModelViewSet):
+class CurrentBlockViewset(viewsets.ReadOnlyModelViewSet):
     serializer_class = BlockSerializer
     def get_queryset(self):
         return Block.current.all()
@@ -63,12 +63,12 @@ class CurrentBlockViewset(viewsets.ModelViewSet):
 class CurrentBlockBriefViewset(CurrentBlockViewset):
     serializer_class = BlockBriefSerializer
 
-class ExpectedBlockViewset(viewsets.ModelViewSet):
+class ExpectedBlockViewset(viewsets.ReadOnlyModelViewSet):
     serializer_class = BlockSerializer
     def get_queryset(self):
         return Block.expected.all()
 
-class PendingBlockViewset(viewsets.ModelViewSet):
+class PendingBlockViewset(viewsets.ReadOnlyModelViewSet):
     serializer_class = BlockSerializer
     def get_queryset(self):
         return Block.pending.all()
