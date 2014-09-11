@@ -43,7 +43,7 @@ class PendingBlockManager(models.Manager):
             Q(unblock_at__isnull=True)
         ).exclude(
             forced_unblock=False,
-            id__in = BlockEntry.objects.values_list('block_id', flat=True)
+            id__in = BlockEntry.objects.filter(removed__isnull=True).values_list('block_id', flat=True)
         )
 class PendingRemovalBlockManager(models.Manager):
     def get_queryset(self):
@@ -176,7 +176,7 @@ class BHRDB(object):
 
     def block_queue(self, ident):
         return self.expected().exclude(
-            id__in = BlockEntry.objects.filter(ident=ident).values_list('block_id', flat=True))
+            id__in = BlockEntry.objects.filter(removed__isnull=True, ident=ident).values_list('block_id', flat=True))
 
     def unblock_queue(self, ident):
         return BlockEntry.objects.filter(removed__isnull=True, ident=ident).filter(

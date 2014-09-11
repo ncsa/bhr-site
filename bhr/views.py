@@ -58,20 +58,25 @@ class BlockViewset(viewsets.ModelViewSet):
 class CurrentBlockViewset(viewsets.ReadOnlyModelViewSet):
     serializer_class = BlockSerializer
     def get_queryset(self):
-        return Block.current.all()
+        return Block.current.all().select_related('who')
 
 class CurrentBlockBriefViewset(CurrentBlockViewset):
     serializer_class = BlockBriefSerializer
 
 class ExpectedBlockViewset(viewsets.ReadOnlyModelViewSet):
-    serializer_class = BlockSerializer
+    serializer_class = BlockBriefSerializer
     def get_queryset(self):
-        return Block.expected.all()
+        return Block.expected.all().select_related('who')
 
 class PendingBlockViewset(viewsets.ReadOnlyModelViewSet):
     serializer_class = BlockSerializer
     def get_queryset(self):
-        return Block.pending.all()
+        return Block.pending.all().select_related('who')
+
+class PendingRemovalBlockViewset(viewsets.ReadOnlyModelViewSet):
+    serializer_class = BlockSerializer
+    def get_queryset(self):
+        return Block.pending_removal.all().select_related('who')
 
 from rest_framework.views import APIView
 class BlockHistory(generics.ListAPIView):
@@ -79,21 +84,21 @@ class BlockHistory(generics.ListAPIView):
 
     def get_queryset(self):
         cidr = self.kwargs['cidr']
-        return Block.objects.filter(cidr=cidr)
+        return Block.objects.filter(cidr=cidr).select_related('who')
 
 class BlockQueue(generics.ListAPIView):
     serializer_class = BlockSerializer
 
     def get_queryset(self):
         ident = self.kwargs['ident']
-        return BHRDB().block_queue(ident)[:1000]
+        return BHRDB().block_queue(ident)[:100]
 
 class UnBlockQueue(generics.ListAPIView):
     serializer_class = UnBlockEntrySerializer
 
     def get_queryset(self):
         ident = self.kwargs['ident']
-        return BHRDB().unblock_queue(ident)[:1000]
+        return BHRDB().unblock_queue(ident)[:100]
 
 from rest_framework.response import Response
 
