@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.test import TestCase
+import csv
 
 from bhr.models import BHRDB, WhitelistEntry
 
@@ -394,3 +395,15 @@ class ApiTest(TestCase):
         self.assertEqual(len(q), 0, "there should be no queue for bgp2")
         q = self.client.get("/bhr/api/unblock_queue/bgp2").data
         self.assertEqual(len(q), 0, "there should be no unblock queue for bgp2")
+
+    def test_list_csv(self):
+        self._add_block(duration=30)
+
+        csv_txt= self.client.get("/bhr/list.csv").content
+
+        data = list(csv.DictReader(csv_txt.splitlines()))
+
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['who'], "admin")
+        self.assertEqual(data[0]['why'], "testing")
+        self.assertEqual(data[0]['source'], "test")

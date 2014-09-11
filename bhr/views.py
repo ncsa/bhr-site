@@ -10,6 +10,8 @@ from rest_framework import status
 from rest_framework import generics
 from rest_framework.decorators import api_view
 from rest_framework.decorators import detail_route, list_route
+from rest_framework.settings import api_settings
+from rest_framework_csv.renderers import CSVRenderer
 
 from django.db.models import Q
 from django.utils import timezone
@@ -61,6 +63,7 @@ class CurrentBlockViewset(viewsets.ReadOnlyModelViewSet):
         return Block.current.all().select_related('who')
 
 class CurrentBlockBriefViewset(CurrentBlockViewset):
+    renderer_classes = [CSVRenderer] + api_settings.DEFAULT_RENDERER_CLASSES
     serializer_class = BlockBriefSerializer
 
 class ExpectedBlockViewset(viewsets.ReadOnlyModelViewSet):
@@ -112,3 +115,10 @@ def block(request):
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+from bhr.util import respond_csv
+@api_view(["GET"])
+def bhlist(request):
+    resp = []
+    blocks = BHRDB().expected().values_list('cidr','who__username','source','why', 'added', 'unblock_at')
+    return respond_csv(blocks, ["cidr", "who", "source", "why", "added", "unblock_at"])

@@ -23,4 +23,5 @@ urlpatterns = patterns('',
     url(r'^api/queue/(?P<ident>.+)', views.BlockQueue.as_view()),
     url(r'^api/unblock_queue/(?P<ident>.+)', views.UnBlockQueue.as_view()),
     url(r'^api/query/(?P<cidr>.+)', views.BlockHistory.as_view()),
+    url(r'^list.csv', views.bhlist),
 )
