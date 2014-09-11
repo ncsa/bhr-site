@@ -25,7 +25,7 @@ class WhitelistEntry(models.Model):
 class CurrentBlockManager(models.Manager):
     def get_queryset(self):
         return super(CurrentBlockManager, self).get_queryset().filter(
-            id__in = BlockEntry.objects.filter(removed__isnull=True).values_list('block_id', flat=True))
+            id__in = BlockEntry.objects.distinct('block_id').filter(removed__isnull=True).values_list('block_id', flat=True))
 
 class ExpectedBlockManager(models.Manager):
     def get_queryset(self):
