@@ -97,14 +97,14 @@ class BlockQueue(generics.ListAPIView):
 
     def get_queryset(self):
         ident = self.kwargs['ident']
-        return BHRDB().block_queue(ident, limit=100)
+        return BHRDB().block_queue(ident, limit=200)
 
 class UnBlockQueue(generics.ListAPIView):
     serializer_class = UnBlockEntrySerializer
 
     def get_queryset(self):
         ident = self.kwargs['ident']
-        return BHRDB().unblock_queue(ident)[:100]
+        return BHRDB().unblock_queue(ident)[:200]
 
 from rest_framework.response import Response
 

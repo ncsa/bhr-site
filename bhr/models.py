@@ -176,7 +176,7 @@ class BHRDB(object):
         b.set_unblocked()
         b.save()
 
-    def block_queue(self, ident, limit=100):
+    def block_queue(self, ident, limit=200):
         return list(Block.objects.raw("""
             SELECT b.id as pk, * from bhr_block b
             LEFT JOIN bhr_blockentry be
