@@ -13,9 +13,12 @@ from rest_framework.decorators import detail_route, list_route
 from rest_framework.settings import api_settings
 from rest_framework_csv.renderers import CSVRenderer
 
+from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 import datetime
+
+from django.db import transaction
 
 class WhitelistViewSet(viewsets.ModelViewSet):
     queryset = WhitelistEntry.objects.all()
@@ -115,18 +118,32 @@ def block(request):
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(["POST"])
-def mblock(request):
-    context = {"request": request}
-    serializer = BlockRequestSerializer(data=request.DATA, many=True)
-    created = []
-    if serializer.is_valid():
-        for block in serializer.data:
-            b = BHRDB().add_block(who=request.user, **block)
-            created.append(b)
-        return Response(BlockSerializer(created, many=True, context=context).data, status=status.HTTP_201_CREATED)
+class mblock(APIView):
+    def post(self, request):
+        context = {"request": request}
+        serializer = BlockRequestSerializer(data=request.DATA, many=True)
+        created = []
+        if serializer.is_valid():
+            #FIXME: move this into BHRDB directly
+            with transaction.atomic():
+                for block in serializer.data:
+                    b = BHRDB().add_block(who=request.user, **block)
+                    created.append(b)
+            return Response(BlockSerializer(created, many=True, context=context).data, status=status.HTTP_201_CREATED)
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class set_blocked_multi(APIView):
+    def post(self, request, ident):
+        ids = request.DATA['ids']
+        BHRDB().set_blocked_multi(ident, ids)
+        return Response({'status': 'ok'})
+
+class set_unblocked_multi(APIView):
+    def post(self, request):
+        ids = request.DATA['ids']
+        BHRDB().set_unblocked_multi(ids)
+        return Response({'status': 'ok'})
 
 from bhr.util import respond_csv
 @api_view(["GET"])

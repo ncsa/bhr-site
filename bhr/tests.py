@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.test import TestCase
+import json
 import csv
 
 from bhr.models import BHRDB, WhitelistEntry
@@ -407,3 +408,11 @@ class ApiTest(TestCase):
         self.assertEqual(data[0]['who'], "admin")
         self.assertEqual(data[0]['why'], "testing")
         self.assertEqual(data[0]['source'], "test")
+
+    def test_set_blocked_multi(self):
+        self._add_block()
+
+        block = self.client.get("/bhr/api/queue/bgp1").data[0]
+        q = self.client.get("/bhr/api/set_blocked_multi/bgp1").data
+
+        self.client.post(post, dict(ident='bgp1'))

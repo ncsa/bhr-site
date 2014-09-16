@@ -26,7 +26,7 @@ class BlockQueueSerializer(serializers.ModelSerializer):
     set_blocked = serializers.HyperlinkedIdentityField(view_name='block-set-blocked', lookup_field='pk')
     class Meta:
         model = Block
-        fields = ('cidr', 'set_blocked')
+        fields = ('id', 'cidr', 'set_blocked')
 
 class BlockEntrySerializer(serializers.HyperlinkedModelSerializer):
     block = BlockBriefSerializer()
@@ -40,7 +40,7 @@ class UnBlockEntrySerializer(serializers.HyperlinkedModelSerializer):
     set_unblocked = serializers.HyperlinkedIdentityField(view_name='blockentry-set-unblocked', lookup_field='pk')
     class Meta:
         model = BlockEntry
-        fields = ('block', 'ident', 'added', 'set_unblocked')
+        fields = ('id', 'block', 'ident', 'added', 'set_unblocked')
 
 class BlockRequestSerializer(serializers.Serializer):
     cidr = serializers.CharField(max_length=20)

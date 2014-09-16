@@ -20,7 +20,11 @@ urlpatterns = patterns('',
     # url(r'^blog/', include('blog.urls')),
     url(r'^api/', include(router.urls)),
     url(r'^api/block$', views.block),
-    url(r'^api/mblock$', views.mblock),
+
+    url(r'^api/mblock$', views.mblock.as_view()),
+    url(r'^api/set_blocked_multi/(?P<ident>.+)$', views.set_blocked_multi.as_view()),
+    url(r'^api/set_unblocked_multi$', views.set_unblocked_multi.as_view()),
+
     url(r'^api/queue/(?P<ident>.+)', views.BlockQueue.as_view()),
     url(r'^api/unblock_queue/(?P<ident>.+)', views.UnBlockQueue.as_view()),
     url(r'^api/query/(?P<cidr>.+)', views.BlockHistory.as_view()),
