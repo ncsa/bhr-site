@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Q
+from django.db import transaction
 
 from netfields import CidrAddressField
 
@@ -175,7 +176,7 @@ class BHRDB(object):
         b.set_unblocked()
         b.save()
 
-    def block_queue(self, ident, limit=100):
+    def block_queue(self, ident, limit=200):
         return list(Block.objects.raw("""
             SELECT b.id as pk, * from bhr_block b
             LEFT JOIN bhr_blockentry be
@@ -195,3 +196,16 @@ class BHRDB(object):
     def unblock_queue(self, ident):
         return BlockEntry.objects.filter(removed__isnull=True, ident=ident).filter(
             block_id__in = self.expired().values_list('id', flat=True))
+
+    def set_blocked_multi(self, ident, ids):
+        with transaction.atomic():
+            for id in ids:
+                block = Block.objects.get(pk=id)
+                block.blockentry_set.create(ident=ident)
+
+    def set_unblocked_multi(self, ids):
+        with transaction.atomic():
+            for id in ids:
+                entry = BlockEntry.objects.get(pk=id)
+                entry.set_unblocked()
+                entry.save()

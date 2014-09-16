@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.test import TestCase
+import json
 import csv
 
 from bhr.models import BHRDB, WhitelistEntry
@@ -209,9 +210,9 @@ class ApiTest(TestCase):
         self.user = user = User.objects.create_user('admin', 'temporary@gmail.com', 'admin')
         self.client.login(username='admin', password='admin')
 
-    def _add_block(self, duration=30, skip_whitelist=0):
+    def _add_block(self, cidr='1.2.3.4', duration=30, skip_whitelist=0):
         return self.client.post('/bhr/api/block', dict(
-            cidr='1.2.3.4',
+            cidr=cidr,
             source='test',
             why='testing',
             duration=duration,
@@ -407,3 +408,45 @@ class ApiTest(TestCase):
         self.assertEqual(data[0]['who'], "admin")
         self.assertEqual(data[0]['why'], "testing")
         self.assertEqual(data[0]['source'], "test")
+
+    def test_set_blocked_multi(self):
+        self._add_block('1.2.3.4')
+        self._add_block('4.3.2.1')
+
+        blocks = self.client.get("/bhr/api/queue/bgp1").data
+
+        ids = [b['id'] for b in blocks]
+        data = json.dumps({"ids": ids})
+        self.client.post("/bhr/api/set_blocked_multi/bgp1", data=data, content_type="application/json").data
+
+        q = self.client.get("/bhr/api/queue/bgp1").data
+        self.assertEqual(len(q), 0)
+
+    def test_set_unblocked_multi(self):
+        self._add_block('1.2.3.4', duration=2)
+        self._add_block('4.3.2.1', duration=2)
+
+        #as above
+        blocks = self.client.get("/bhr/api/queue/bgp1").data
+        ids = [b['id'] for b in blocks]
+        data = json.dumps({"ids": ids})
+        self.client.post("/bhr/api/set_blocked_multi/bgp1", data=data, content_type="application/json").data
+
+        q = self.client.get("/bhr/api/queue/bgp1").data
+        self.assertEqual(len(q), 0)
+
+        #now wait...
+        sleep(4)
+
+        #grab queue
+        blocks = self.client.get("/bhr/api/unblock_queue/bgp1").data
+        self.assertEqual(len(blocks), 2)
+
+        #send set unblocked request
+        ids = [b['id'] for b in blocks]
+        data = json.dumps({"ids": ids})
+        self.client.post("/bhr/api/set_unblocked_multi", data=data, content_type="application/json").data
+
+        #check result
+        blocks = self.client.get("/bhr/api/unblock_queue/bgp1").data
+        self.assertEqual(len(blocks), 0)
