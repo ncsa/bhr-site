@@ -1,8 +1,10 @@
+from django.contrib.auth.decorators import login_required, permission_required
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 
 from rest_framework import routers
 from bhr import views
+from bhr import browser_views
 
 router = routers.DefaultRouter()
 router.register(r'whitelist', views.WhitelistViewSet)
@@ -28,5 +30,8 @@ urlpatterns = patterns('',
     url(r'^api/queue/(?P<ident>.+)', views.BlockQueue.as_view()),
     url(r'^api/unblock_queue/(?P<ident>.+)', views.UnBlockQueue.as_view()),
     url(r'^api/query/(?P<cidr>.+)', views.BlockHistory.as_view()),
-    url(r'^list.csv', views.bhlist),
+
+    url('^$', browser_views.IndexView.as_view()),
+    url('^add$', permission_required('bhr.add_block')(browser_views.AddView.as_view()), name="add"),
+    url(r'^list.csv', views.bhlist, name='csv'),
 )
