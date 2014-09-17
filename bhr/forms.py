@@ -19,7 +19,8 @@ class BlockForm(ModelForm):
         return cleaned_data
 
 DURATION_CHOICES = (
-    (3600, '1 Hour'),
+    (300,           '5 minutes'),
+    (3600,          '1 Hour'),
     (60*60*24,      '1 Day'),
     (60*60*24*7,    '1 Week'),
     (60*60*24*30,   '1 Month'),
@@ -30,11 +31,14 @@ class AddBlockForm(forms.Form):
     cidr = CidrAddressFormField()
     why = forms.CharField(widget=forms.Textarea)
     duration = forms.ChoiceField(choices=DURATION_CHOICES)
-    skip_whitelist = forms.BooleanField()
+    skip_whitelist = forms.BooleanField(required=False)
 
     def clean_duration(self):
-        self.cleaned_data['duration'] = int(self.cleaned_data['duration'])
+        d = self.cleaned_data['duration'] = int(self.cleaned_data['duration'])
+        return d
+
     def clean(self):
         cleaned_data = super(AddBlockForm, self).clean()
         check_whitelistr(cleaned_data)
+        print cleaned_data
         return cleaned_data
