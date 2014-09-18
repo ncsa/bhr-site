@@ -201,6 +201,28 @@ class DBTests(TestCase):
         q = self.db.unblock_queue('bgp1')
         self.assertEqual(len(q), 0)
 
+    def test_stats(self):
+        def check_counts(block_pending=0, unblock_pending=0, current=0, expected=0):
+            stats = self.db.stats()
+            self.assertEqual(stats["block_pending"], block_pending)
+            self.assertEqual(stats["unblock_pending"], unblock_pending)
+            self.assertEqual(stats["current"], current)
+            self.assertEqual(stats["expected"], expected)
+
+        check_counts()
+
+        b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing')
+        check_counts(block_pending=1, expected=1)
+
+        self.db.set_blocked(b1, 'bgp1')
+        check_counts(current=1, expected=1)
+
+        self.db.unblock_now('1.2.3.4', 'testing')
+        check_counts(current=1, expected=0, unblock_pending=1)
+
+        self.db.set_unblocked(b1, 'bgp1')
+        check_counts()
+
 from rest_framework.test import APITestCase
 from rest_framework import status
 from time import sleep
@@ -450,3 +472,10 @@ class ApiTest(TestCase):
         #check result
         blocks = self.client.get("/bhr/api/unblock_queue/bgp1").data
         self.assertEqual(len(blocks), 0)
+
+    def test_stats(self):
+        self._add_block('1.2.3.4', duration=2)
+        self._add_block('4.3.2.1', duration=2)
+        stats = self.client.get("/bhr/api/stats").data
+
+        self.assertEqual(stats['expected'], 2)

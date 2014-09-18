@@ -212,3 +212,12 @@ class BHRDB(object):
 
     def get_history(self, cidr):
         return Block.objects.filter(cidr=cidr).select_related('who')
+
+    def stats(self):
+        ret = {}
+        ret['block_pending'] = self.pending().count()
+        ret['unblock_pending'] = self.pending_removal().count()
+        ret['current'] = self.current().count()
+        ret['expected'] = self.expected().count()
+
+        return ret

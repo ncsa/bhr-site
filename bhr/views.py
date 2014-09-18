@@ -145,6 +145,11 @@ class set_unblocked_multi(APIView):
         BHRDB().set_unblocked_multi(ids)
         return Response({'status': 'ok'})
 
+@api_view(["GET"])
+def stats(request):
+    stats = BHRDB().stats()
+    return Response(stats)
+
 from bhr.util import respond_csv
 @api_view(["GET"])
 def bhlist(request):
