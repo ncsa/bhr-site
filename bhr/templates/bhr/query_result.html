@@ -1,0 +1,32 @@
+<form action="" method="GET">
+    {{ form.as_p }}
+    <input type="submit" value="Query" />
+</form>
+
+<table>
+
+<thead>
+<tr>
+    <th>Cidr</th>
+    <th>Who</th>
+    <th>Source</th>
+    <th>Why</th>
+    <th>Added</th>
+    <th>Unblock At</th>
+</tr>
+</thead>
+
+<tbody>
+{% for b in blocks %}
+    <tr>
+        <td>{{ b.cidr }} </td>
+        <td>{{ b.who }} </td>
+        <td>{{ b.source }} </td>
+        <td>{{ b.why }} </td>
+        <td>{{ b.added }} </td>
+        <td>{{ b.unblock_at }} </td>
+    </tr>
+{% endfor %}
+</tbody>
+
+</table>

@@ -33,5 +33,6 @@ urlpatterns = patterns('',
 
     url('^$', browser_views.IndexView.as_view()),
     url('^add$', permission_required('bhr.add_block')(browser_views.AddView.as_view()), name="add"),
+    url('^query$', login_required(browser_views.QueryView.as_view()), name="query"),
     url(r'^list.csv', views.bhlist, name='csv'),
 )

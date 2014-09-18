@@ -209,3 +209,6 @@ class BHRDB(object):
                 entry = BlockEntry.objects.get(pk=id)
                 entry.set_unblocked()
                 entry.save()
+
+    def get_history(self, cidr):
+        return Block.objects.filter(cidr=cidr).select_related('who')

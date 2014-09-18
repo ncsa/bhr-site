@@ -42,3 +42,6 @@ class AddBlockForm(forms.Form):
         check_whitelistr(cleaned_data)
         print cleaned_data
         return cleaned_data
+
+class QueryBlockForm(forms.Form):
+    cidr = CidrAddressFormField()
