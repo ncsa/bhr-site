@@ -3,7 +3,7 @@
     <input type="submit" value="Query" />
 </form>
 
-<table>
+<table border=1>
 
 <thead>
 <tr>
@@ -25,6 +25,14 @@
         <td>{{ b.why }} </td>
         <td>{{ b.added }} </td>
         <td>{{ b.unblock_at }} </td>
+        <td>
+            <table>
+            <tr><th>Ident</th><th>Added</th><th>Removed</th></tr>
+            {% for e in b.blockentry_set.all %}
+                <tr><td>{{ e.ident }}</td> <td>{{e.added}}</td> <td>{{e.removed}}</td></tr>
+            {% endfor %}
+            </table>
+        </td>
     </tr>
 {% endfor %}
 </tbody>
