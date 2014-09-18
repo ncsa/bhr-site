@@ -3,7 +3,7 @@ from django.forms import ModelForm
 from bhr.models import is_whitelisted
 from netfields.forms import CidrAddressFormField
 
-def check_whitelistr(cleaned_data):
+def check_whitelist(cleaned_data):
     cidr = cleaned_data.get('cidr')
     skip_whitelist = cleaned_data.get('skip_whitelist')
     if cidr and not skip_whitelist:
@@ -39,7 +39,7 @@ class AddBlockForm(forms.Form):
 
     def clean(self):
         cleaned_data = super(AddBlockForm, self).clean()
-        check_whitelistr(cleaned_data)
+        check_whitelist(cleaned_data)
         print cleaned_data
         return cleaned_data
 
