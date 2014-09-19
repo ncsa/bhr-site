@@ -36,3 +36,8 @@ class QueryView(View):
 
         blocks = BHRDB().get_history(form.cleaned_data['cidr']).prefetch_related("blockentry_set")
         return render(self.request, "bhr/query_result.html", {"form": form, "blocks": blocks})
+
+class StatsView(TemplateView):
+    template_name = "bhr/stats.html"
+    def get_context_data(self, *args):
+        return {'stats': BHRDB().stats()}
