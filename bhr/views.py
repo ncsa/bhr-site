@@ -72,7 +72,12 @@ class CurrentBlockBriefViewset(CurrentBlockViewset):
 class ExpectedBlockViewset(viewsets.ReadOnlyModelViewSet):
     serializer_class = BlockBriefSerializer
     def get_queryset(self):
-        return Block.expected.all().select_related('who')
+        queryset = Block.expected.all().select_related('who')
+        source = self.request.QUERY_PARAMS.get('source', None)
+        if source:
+            queryset = queryset.filter(source=source)
+        return queryset
+
 
 class PendingBlockViewset(viewsets.ReadOnlyModelViewSet):
     serializer_class = BlockSerializer

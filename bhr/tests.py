@@ -232,10 +232,10 @@ class ApiTest(TestCase):
         self.user = user = User.objects.create_user('admin', 'temporary@gmail.com', 'admin')
         self.client.login(username='admin', password='admin')
 
-    def _add_block(self, cidr='1.2.3.4', duration=30, skip_whitelist=0):
+    def _add_block(self, cidr='1.2.3.4', duration=30, skip_whitelist=0,source='test'):
         return self.client.post('/bhr/api/block', dict(
             cidr=cidr,
-            source='test',
+            source=source,
             why='testing',
             duration=duration,
             skip_whitelist=skip_whitelist
@@ -479,3 +479,17 @@ class ApiTest(TestCase):
         stats = self.client.get("/bhr/api/stats").data
 
         self.assertEqual(stats['expected'], 2)
+
+    def test_expected_source_filtering(self):
+        self._add_block('1.1.1.1', source='one')
+        self._add_block('2.2.2.1', source='two')
+        self._add_block('2.2.2.2', source='two')
+        
+        blocks = self.client.get("/bhr/api/expected_blocks/").data
+        self.assertEqual(len(blocks), 3)
+
+        blocks = self.client.get("/bhr/api/expected_blocks/?source=one").data
+        self.assertEqual(len(blocks), 1)
+
+        blocks = self.client.get("/bhr/api/expected_blocks/?source=two").data
+        self.assertEqual(len(blocks), 2)
