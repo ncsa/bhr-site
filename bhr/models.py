@@ -4,6 +4,7 @@ from django.db.models import Q
 from django.db import transaction
 
 from netfields import CidrAddressField
+from netaddr import IPNetwork
 
 from django.utils import timezone
 import datetime
@@ -12,6 +13,7 @@ class WhitelistError(Exception):
     pass
 
 def is_whitelisted(cidr):
+    cidr = IPNetwork(cidr)
     for item in WhitelistEntry.objects.all():
         if cidr in item.cidr:
             return item
