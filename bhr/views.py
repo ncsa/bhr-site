@@ -114,24 +114,24 @@ class UnBlockQueue(generics.ListAPIView):
 
 from rest_framework.response import Response
 
-@api_view(["POST"])
-def block(request):
-    context = {"request": request}
-    serializer = BlockRequestSerializer(data=request.DATA)
-    if serializer.is_valid():
-        b = BHRDB().add_block(who=request.user, **serializer.data)
-        return Response(BlockSerializer(b, context=context).data, status=status.HTTP_201_CREATED)
+class block(APIView):
+    def post(self, request):
+        context = {"request": request}
+        serializer = BlockRequestSerializer(data=request.DATA)
+        if serializer.is_valid():
+            b = BHRDB().add_block(who=request.user, **serializer.data)
+            return Response(BlockSerializer(b, context=context).data, status=status.HTTP_201_CREATED)
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(["POST"])
-def unblock_now(request):
-    serializer = UnblockNowSerializer(data=request.DATA)
-    if serializer.is_valid():
-        d = serializer.data
-        BHRDB().unblock_now(d['cidr'], d['why'])
-        return Response({'status': 'ok'})
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class unblock_now(APIView):
+    def post(self, request):
+        serializer = UnblockNowSerializer(data=request.DATA)
+        if serializer.is_valid():
+            d = serializer.data
+            BHRDB().unblock_now(d['cidr'], d['why'])
+            return Response({'status': 'ok'})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class mblock(APIView):
     def post(self, request):
