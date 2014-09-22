@@ -22,6 +22,7 @@ urlpatterns = patterns('',
     # url(r'^blog/', include('blog.urls')),
     url(r'^api/', include(router.urls)),
     url(r'^api/block$', views.block),
+    url(r'^api/unblock_now$', views.unblock_now),
     url(r'^api/stats$', views.stats),
 
     url(r'^api/mblock$', views.mblock.as_view()),

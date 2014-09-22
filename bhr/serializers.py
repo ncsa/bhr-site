@@ -65,3 +65,7 @@ class BlockRequestSerializer(serializers.Serializer):
 
 class SetBlockedSerializer(serializers.Serializer):
     ident = serializers.CharField()
+
+class UnblockNowSerializer(serializers.Serializer):
+    cidr = serializers.CharField(max_length=20)
+    why = serializers.CharField()

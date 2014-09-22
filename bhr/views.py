@@ -2,6 +2,7 @@ from rest_framework import viewsets
 from bhr.models import WhitelistEntry, Block, BlockEntry, BHRDB
 from bhr.serializers import (WhitelistEntrySerializer,
     BlockSerializer, BlockBriefSerializer, BlockQueueSerializer,
+    UnblockNowSerializer,
     BlockEntrySerializer, UnBlockEntrySerializer,
     SetBlockedSerializer,
     BlockRequestSerializer,
@@ -122,6 +123,14 @@ def block(request):
         return Response(BlockSerializer(b, context=context).data, status=status.HTTP_201_CREATED)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["POST"])
+def unblock_now(request):
+    serializer = UnblockNowSerializer(data=request.DATA)
+    if serializer.is_valid():
+        d = serializer.data
+        BHRDB().unblock_now(d['cidr'], d['why'])
+    return Response({'status': 'ok'})
 
 class mblock(APIView):
     def post(self, request):

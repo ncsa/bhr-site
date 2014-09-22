@@ -285,7 +285,20 @@ class ApiTest(TestCase):
         self.client.post(block['set_blocked'], dict(ident='bgp1'))
 
         data = self.client.get("/bhr/api/queue/bgp1").data
-        self.assertEqual(len(data), 0)
+
+    def test_unblock_now(self):
+        self._add_block(cidr='1.2.3.4')
+
+        block = self.client.get("/bhr/api/queue/bgp1").data[0]
+        self.client.post(block['set_blocked'], dict(ident='bgp1'))
+
+        q = self.client.get("/bhr/api/unblock_queue/bgp1").data
+        self.assertEqual(len(q), 0)
+
+        self.client.post("/bhr/api/unblock_now", dict(cidr="1.2.3.4", why="testing"))
+
+        q = self.client.get("/bhr/api/unblock_queue/bgp1").data
+        self.assertEqual(len(q), 1)
 
     def test_block_queue_with_two_blockers(self):
         self._add_block()
