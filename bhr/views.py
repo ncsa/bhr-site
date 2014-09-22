@@ -12,6 +12,7 @@ from rest_framework import generics
 from rest_framework.decorators import api_view
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.settings import api_settings
+from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework_csv.renderers import CSVRenderer
 
 from django.db import transaction
@@ -22,16 +23,18 @@ import datetime
 from django.db import transaction
 
 class WhitelistViewSet(viewsets.ModelViewSet):
-    queryset = WhitelistEntry.objects.all()
     serializer_class = WhitelistEntrySerializer
+    permission_classes = [DjangoModelPermissions]
+    queryset = WhitelistEntry.objects.all()
 
     def pre_save(self, obj):
         obj.who = self.request.user
         return super(WhitelistViewSet, self).pre_save(obj)
 
 class BlockEntryViewset(viewsets.ModelViewSet):
-    queryset = BlockEntry.objects.all()
     serializer_class = BlockEntrySerializer
+    permission_classes = [DjangoModelPermissions]
+    queryset = BlockEntry.objects.all()
 
     @detail_route(methods=['post'])
     def set_unblocked(self, request, pk=None):
@@ -41,8 +44,9 @@ class BlockEntryViewset(viewsets.ModelViewSet):
         return Response({'status': 'ok'})
 
 class BlockViewset(viewsets.ModelViewSet):
-    queryset = Block.objects.all()
     serializer_class = BlockSerializer
+    permission_classes = [DjangoModelPermissions]
+    queryset = Block.objects.all()
 
     def pre_save(self, obj):
         """Force who to the current user on save"""
@@ -63,15 +67,21 @@ class BlockViewset(viewsets.ModelViewSet):
 
 class CurrentBlockViewset(viewsets.ReadOnlyModelViewSet):
     serializer_class = BlockSerializer
+    permission_classes = [DjangoModelPermissions]
+    queryset = Block.objects.none()  # Required for DjangoModelPermissions
     def get_queryset(self):
         return Block.current.all().select_related('who')
 
 class CurrentBlockBriefViewset(CurrentBlockViewset):
-    renderer_classes = [CSVRenderer] + api_settings.DEFAULT_RENDERER_CLASSES
     serializer_class = BlockBriefSerializer
+    permission_classes = [DjangoModelPermissions]
+    queryset = Block.objects.none()  # Required for DjangoModelPermissions
+    renderer_classes = [CSVRenderer] + api_settings.DEFAULT_RENDERER_CLASSES
 
 class ExpectedBlockViewset(viewsets.ReadOnlyModelViewSet):
     serializer_class = BlockBriefSerializer
+    permission_classes = [DjangoModelPermissions]
+    queryset = Block.objects.none()  # Required for DjangoModelPermissions
     def get_queryset(self):
         queryset = Block.expected.all().select_related('who')
         source = self.request.QUERY_PARAMS.get('source', None)
@@ -82,17 +92,23 @@ class ExpectedBlockViewset(viewsets.ReadOnlyModelViewSet):
 
 class PendingBlockViewset(viewsets.ReadOnlyModelViewSet):
     serializer_class = BlockSerializer
+    permission_classes = [DjangoModelPermissions]
+    queryset = Block.objects.none()  # Required for DjangoModelPermissions
     def get_queryset(self):
         return Block.pending.all().select_related('who')
 
 class PendingRemovalBlockViewset(viewsets.ReadOnlyModelViewSet):
     serializer_class = BlockSerializer
+    permission_classes = [DjangoModelPermissions]
+    queryset = Block.objects.none()  # Required for DjangoModelPermissions
     def get_queryset(self):
         return Block.pending_removal.all().select_related('who')
 
 from rest_framework.views import APIView
 class BlockHistory(generics.ListAPIView):
     serializer_class = BlockSerializer
+    permission_classes = [DjangoModelPermissions]
+    queryset = Block.objects.none()  # Required for DjangoModelPermissions
 
     def get_queryset(self):
         cidr = self.kwargs['cidr']
@@ -100,6 +116,8 @@ class BlockHistory(generics.ListAPIView):
 
 class BlockQueue(generics.ListAPIView):
     serializer_class = BlockQueueSerializer
+    permission_classes = [DjangoModelPermissions]
+    queryset = Block.objects.none()  # Required for DjangoModelPermissions
 
     def get_queryset(self):
         ident = self.kwargs['ident']
@@ -107,6 +125,8 @@ class BlockQueue(generics.ListAPIView):
 
 class UnBlockQueue(generics.ListAPIView):
     serializer_class = UnBlockEntrySerializer
+    permission_classes = [DjangoModelPermissions]
+    queryset = Block.objects.none()  # Required for DjangoModelPermissions
 
     def get_queryset(self):
         ident = self.kwargs['ident']
@@ -115,6 +135,8 @@ class UnBlockQueue(generics.ListAPIView):
 from rest_framework.response import Response
 
 class block(APIView):
+    permission_classes = [DjangoModelPermissions]
+    queryset = Block.objects.none()  # Required for DjangoModelPermissions
     def post(self, request):
         context = {"request": request}
         serializer = BlockRequestSerializer(data=request.DATA)
@@ -125,6 +147,8 @@ class block(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class unblock_now(APIView):
+    permission_classes = [DjangoModelPermissions]
+    queryset = Block.objects.none()  # Required for DjangoModelPermissions
     def post(self, request):
         serializer = UnblockNowSerializer(data=request.DATA)
         if serializer.is_valid():
@@ -134,6 +158,8 @@ class unblock_now(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class mblock(APIView):
+    permission_classes = [DjangoModelPermissions]
+    queryset = Block.objects.none()  # Required for DjangoModelPermissions
     def post(self, request):
         context = {"request": request}
         serializer = BlockRequestSerializer(data=request.DATA, many=True)
@@ -149,12 +175,16 @@ class mblock(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class set_blocked_multi(APIView):
+    permission_classes = [DjangoModelPermissions]
+    queryset = BlockEntry.objects.none()  # Required for DjangoModelPermissions
     def post(self, request, ident):
         ids = request.DATA['ids']
         BHRDB().set_blocked_multi(ident, ids)
         return Response({'status': 'ok'})
 
 class set_unblocked_multi(APIView):
+    permission_classes = [DjangoModelPermissions]
+    queryset = BlockEntry.objects.none()  # Required for DjangoModelPermissions
     def post(self, request):
         ids = request.DATA['ids']
         BHRDB().set_unblocked_multi(ids)

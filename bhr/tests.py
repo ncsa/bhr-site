@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
 from django.test import TestCase
 import json
 import csv
@@ -231,6 +231,8 @@ class ApiTest(TestCase):
     def setUp(self):
         self.user = user = User.objects.create_user('admin', 'temporary@gmail.com', 'admin')
         self.client.login(username='admin', password='admin')
+        for perm in 'add_block change_block add_blockentry change_blockentry'.split():
+            self.user.user_permissions.add(Permission.objects.get(codename=perm))
 
     def _add_block(self, cidr='1.2.3.4', duration=30, skip_whitelist=0,source='test'):
         return self.client.post('/bhr/api/block', dict(
