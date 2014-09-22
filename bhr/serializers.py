@@ -1,6 +1,6 @@
 from bhr.models import WhitelistEntry, Block, BlockEntry
 from rest_framework import serializers
-from bhr.models import is_whitelisted
+from bhr.models import BHRDB, is_whitelisted
 
 class WhitelistEntrySerializer(serializers.ModelSerializer):
     who = serializers.SlugField(read_only=True)
@@ -69,3 +69,10 @@ class SetBlockedSerializer(serializers.Serializer):
 class UnblockNowSerializer(serializers.Serializer):
     cidr = serializers.CharField(max_length=20)
     why = serializers.CharField()
+
+    def validate_cidr(self, attrs, source):
+        cidr = attrs[source]
+        b = BHRDB().get_block(cidr)
+        if not b:
+            raise serializers.ValidationError("%s is not currently blocked" % cidr)
+        return attrs
