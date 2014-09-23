@@ -30,7 +30,11 @@ class AddView(FormView):
 
 class QueryView(View):
     def get(self, request):
-        form = QueryBlockForm(self.request.GET)
+        if self.request.GET:
+            form = QueryBlockForm(self.request.GET)
+        else:
+            form = QueryBlockForm()
+
         if not form.is_valid():
             return render(self.request, "bhr/query.html", {"form": form})
 
