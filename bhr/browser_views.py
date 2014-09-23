@@ -1,5 +1,6 @@
 from django.views.generic import View, FormView, TemplateView, DetailView
-from django.shortcuts import render
+from django.core.urlresolvers import reverse
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 
 from bhr.models import WhitelistEntry, Block, BlockEntry, BHRDB
@@ -20,13 +21,12 @@ class IndexView(TemplateView):
 class AddView(FormView):
     template_name = "bhr/add.html"
     form_class = AddBlockForm
-    success_url = '/bhr'
 
     def form_valid(self, form):
         block_request = form.cleaned_data
         block_request['cidr'] = str(block_request['cidr'])
         BHRDB().add_block(who=self.request.user, source='web', **block_request)
-        return super(AddView, self).form_valid(form)
+        return redirect(reverse("bhr:query") + "?cidr=" +  block_request["cidr"])
 
 class QueryView(View):
     def get(self, request):
