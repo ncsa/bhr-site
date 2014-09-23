@@ -213,7 +213,7 @@ class BHRDB(object):
                 entry.save()
 
     def get_history(self, cidr):
-        return Block.objects.filter(cidr=cidr).select_related('who')
+        return Block.objects.filter(cidr__in_cidr=cidr).select_related('who')
 
     def stats(self):
         ret = {}
@@ -223,3 +223,15 @@ class BHRDB(object):
         ret['expected'] = self.expected().count()
 
         return ret
+
+
+class InCidr(models.Lookup):
+    lookup_name = "in_cidr"
+
+    def as_sql(self, qn, connection):
+        lhs, lhs_params = self.process_lhs(qn, connection)
+        rhs, rhs_params = self.process_rhs(qn, connection)
+        params = lhs_params + rhs_params
+        return '%s <<= %s' % (lhs, rhs), params
+
+models.fields.Field.register_lookup(InCidr)

@@ -112,7 +112,7 @@ class BlockHistory(generics.ListAPIView):
 
     def get_queryset(self):
         cidr = self.kwargs['cidr']
-        return Block.objects.filter(cidr=cidr).select_related('who')
+        return Block.objects.filter(cidr__in_cidr=cidr).select_related('who')
 
 class BlockQueue(generics.ListAPIView):
     serializer_class = BlockQueueSerializer
