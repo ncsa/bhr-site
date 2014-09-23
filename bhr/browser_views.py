@@ -26,7 +26,7 @@ class AddView(FormView):
         block_request = form.cleaned_data
         block_request['cidr'] = str(block_request['cidr'])
         BHRDB().add_block(who=self.request.user, source='web', **block_request)
-        return redirect(reverse("bhr:query") + "?cidr=" +  block_request["cidr"])
+        return redirect(reverse("query") + "?cidr=" +  block_request["cidr"])
 
 class QueryView(View):
     def get(self, request):
