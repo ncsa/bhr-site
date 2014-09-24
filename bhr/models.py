@@ -15,7 +15,7 @@ class WhitelistError(Exception):
 def is_whitelisted(cidr):
     cidr = IPNetwork(cidr)
     for item in WhitelistEntry.objects.all():
-        if cidr in item.cidr:
+        if cidr in item.cidr or item.cidr in cidr:
             return item
     return False
 

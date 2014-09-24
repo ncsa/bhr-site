@@ -3,7 +3,7 @@ from django.test import TestCase
 import json
 import csv
 
-from bhr.models import BHRDB, WhitelistEntry
+from bhr.models import BHRDB, WhitelistEntry, is_whitelisted
 
 # Create your tests here.
 
@@ -222,6 +222,18 @@ class DBTests(TestCase):
 
         self.db.set_unblocked(b1, 'bgp1')
         check_counts()
+
+    def test_whitelist(self):
+        WhitelistEntry(who=self.user, why='test', cidr='141.142.0.0/16').save()
+
+        self.assertEqual(bool(is_whitelisted("1.2.3.4")), False)
+        self.assertEqual(bool(is_whitelisted("1.2.3.0/24")), False)
+
+        self.assertEqual(bool(is_whitelisted("141.142.2.2")), True)
+        self.assertEqual(bool(is_whitelisted("141.142.4.0/24")), True)
+        self.assertEqual(bool(is_whitelisted("141.0.0.0/8")), True)
+
+
 
 from rest_framework.test import APITestCase
 from rest_framework import status
