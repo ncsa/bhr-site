@@ -108,6 +108,26 @@ class Block(models.Model):
                 raise WhitelistError(wle.why)
         super(Block, self).save(*args, **kwargs)
 
+    @property
+    def is_unblockable(self):
+        """Is this block record unblockable?
+        This is not the same as if it IS blocked, but more "should this be blocked"
+        """
+        if self.forced_unblock:
+            return False
+
+        if self.unblock_at is None:
+            return True
+
+        if self.unblock_at > timezone.now():
+            return True
+
+        return False
+
+    def unblock_now(self, why):
+        self.forced_unblock = True
+        self.unblock_why = why
+        self.save()
 
 class BlockEntry(models.Model):
     block = models.ForeignKey(Block)
@@ -161,9 +181,7 @@ class BHRDB(object):
         if not b:
             raise Exception("%s is not blocked" % cidr)
 
-        b.forced_unblock = True
-        b.unblock_why = why
-        b.save()
+        b.unblock_now(why)
 
     def set_blocked(self, b, ident):
         return b.blockentry_set.create(ident=ident)

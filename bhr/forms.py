@@ -45,3 +45,8 @@ class AddBlockForm(forms.Form):
 
 class QueryBlockForm(forms.Form):
     cidr = CidrAddressFormField()
+
+class UnblockForm(forms.Form):
+    block_ids = forms.CharField(max_length=1000, widget=forms.HiddenInput())
+    query = forms.CharField(max_length=30, widget=forms.HiddenInput())
+    why = forms.CharField(widget=forms.Textarea)

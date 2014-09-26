@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 
 from bhr.models import WhitelistEntry, Block, BlockEntry, BHRDB
-from bhr.forms import AddBlockForm, QueryBlockForm
+from bhr.forms import AddBlockForm, QueryBlockForm, UnblockForm
 
 from django.db import transaction
 from django.db.models import Q
@@ -38,8 +38,32 @@ class QueryView(View):
         if not form.is_valid():
             return render(self.request, "bhr/query.html", {"form": form})
 
-        blocks = BHRDB().get_history(form.cleaned_data['cidr']).prefetch_related("blockentry_set")
-        return render(self.request, "bhr/query_result.html", {"form": form, "blocks": blocks})
+        query = form.cleaned_data['cidr']
+        blocks = BHRDB().get_history(query).prefetch_related("blockentry_set")
+        return render(self.request, "bhr/query_result.html", {"query": query, "form": form, "blocks": blocks})
+
+class UnblockView(View):
+    def post(self, request):
+        query = self.request.POST.get("query")
+        block_ids = self.request.POST.getlist("block_id")
+        block_str = " ".join(block_ids)
+        form = UnblockForm(initial={"block_ids": block_str, "query": query})
+        return render(self.request, "bhr/unblock.html", {"form": form})
+
+class DoUnblockView(FormView):
+    template_name = "bhr/unblock.html"
+    form_class = UnblockForm
+
+    def form_valid(self, form):
+        query = form.cleaned_data['query']
+        block_ids = form.cleaned_data['block_ids'].split()
+        why = form.cleaned_data['why']
+
+        block_ids = map(int, block_ids)
+        blocks = Block.objects.filter(id__in=block_ids).all()
+        for b in blocks:
+            b.unblock_now(why)
+        return redirect(reverse("query") + "?cidr=" + query)
 
 class StatsView(TemplateView):
     template_name = "bhr/stats.html"
