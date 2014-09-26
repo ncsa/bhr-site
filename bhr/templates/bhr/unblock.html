@@ -6,4 +6,42 @@
     <input type="submit" value="UnBlock" />
 </form>
 
+<h3>Unblocking:</h3>
+
+<table class="table table-striped table-bordered">
+
+<thead>
+<tr>
+    <th>Cidr</th>
+    <th>Who</th>
+    <th>Source</th>
+    <th>Why</th>
+    <th>Added</th>
+    <th>Unblock At</th>
+</tr>
+</thead>
+
+<tbody>
+{% for b in blocks %}
+    <tr>
+        <td>{{ b.cidr }} </td>
+        <td>{{ b.who }} </td>
+        <td>{{ b.source }} </td>
+        <td>{{ b.why }} </td>
+        <td>{{ b.added }} </td>
+        <td>{{ b.unblock_at }} </td>
+        <td>
+            <table class="table table-striped table-bordered">
+            <tr><th>Ident</th><th>Added</th><th>Removed</th></tr>
+            {% for e in b.blockentry_set.all %}
+                <tr><td>{{ e.ident }}</td> <td>{{e.added}}</td> <td>{{e.removed}}</td></tr>
+            {% endfor %}
+            </table>
+        </td>
+    </tr>
+{% endfor %}
+</tbody>
+
+</table>
+
 {% endblock %}

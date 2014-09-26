@@ -46,9 +46,10 @@ class UnblockView(View):
     def post(self, request):
         query = self.request.POST.get("query")
         block_ids = self.request.POST.getlist("block_id")
+        blocks = Block.objects.filter(id__in=block_ids).all()
         block_str = " ".join(block_ids)
         form = UnblockForm(initial={"block_ids": block_str, "query": query})
-        return render(self.request, "bhr/unblock.html", {"form": form})
+        return render(self.request, "bhr/unblock.html", {"form": form, "blocks": blocks})
 
 class DoUnblockView(FormView):
     template_name = "bhr/unblock.html"
