@@ -231,7 +231,7 @@ class BHRDB(object):
                 entry.save()
 
     def get_history(self, cidr):
-        return Block.objects.filter(cidr__in_cidr=cidr).select_related('who')
+        return Block.objects.filter(cidr__in_cidr=cidr).select_related('who').order_by('-added')
 
     def stats(self):
         ret = {}
