@@ -9,6 +9,11 @@ from netaddr import IPNetwork
 from django.utils import timezone
 import datetime
 
+from django.conf import settings
+
+import logging
+logger = logging.getLogger(__name__)
+
 class WhitelistError(Exception):
     pass
 
@@ -124,6 +129,18 @@ class Block(models.Model):
 
         return False
 
+    @property
+    def duration(self):
+        if self.unblock_at is None:
+            return None
+        return self.unblock_at - self.added
+
+    @property
+    def age(self):
+        if self.unblock_at is None:
+            return None
+        return timezone.now() - self.unblock_at
+
     def unblock_now(self, why):
         self.forced_unblock = True
         self.unblock_why = why
@@ -165,12 +182,49 @@ class BHRDB(object):
         """Get an existing block record"""
         return Block.expected.filter(cidr=cidr).first()
 
-    def add_block(self, cidr, who, source, why, duration=None, unblock_at=None, skip_whitelist=False):
+    def get_last_block(self, cidr):
+        """Get most recent block record"""
+        return Block.objects.filter(cidr=cidr).order_by('-added').first()
+
+    def get_last_block_duration(self, cidr):
+        """Get most recent block record duration"""
+        rec = self.get_last_block(cidr)
+        return rec.duration
+
+    def scale_duration(self, age, duration):
+        minimum_time_window = settings.BHR['minimum_time_window']
+        time_window_factor = settings.BHR['time_window_factor']
+        penalty_time_multiplier = settings.BHR['penalty_time_multiplier']
+        return_to_base_multiplier = settings.BHR['return_to_base_multiplier']
+        return_to_base_factor = settings.BHR['return_to_base_factor']
+
+        #short time frame repeat offender
+        if age <= max(minimum_time_window, time_window_factor * duration):
+            return penalty_time_multiplier * duration
+
+        #medium time frame repeat offender
+        if age <= time_window_factor * return_to_base_multiplier * duration:
+            return duration
+
+        #regular repeat offender
+        return duration/return_to_base_factor;
+
+    def add_block(self, cidr, who, source, why, duration=None, unblock_at=None, skip_whitelist=False, autoscale=False):
         b = self.get_block(cidr)
         if b:
             return b
+
+        if duration and autoscale:
+            lb = self.get_last_block(cidr)
+            if lb:
+                scaled_duration = max(duration, self.scale_duration(lb.age.total_seconds(), lb.duration.total_seconds()))
+                logger.info("Scaled duration from %d to %d", duration, scaled_duration)
+                duration = scaled_duration
+
         if duration and not unblock_at:
             unblock_at = timezone.now() + datetime.timedelta(seconds=duration)
+
+
 
         b = Block(cidr=cidr, who=who, source=source, why=why, unblock_at=unblock_at, skip_whitelist=skip_whitelist)
         b.save()

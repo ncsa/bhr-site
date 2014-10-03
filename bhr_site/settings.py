@@ -92,3 +92,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
 STATIC_URL = '/static/'
+
+BHR = {
+    'time_multiplier':              2.0,
+    'time_window_factor':           2.0,
+    'minimum_time_window':          43200.0,
+    'penalty_time_multiplier':      2.0,
+    'return_to_base_multiplier':    2.0,
+    'return_to_base_factor':        2.0,
+}
