@@ -198,6 +198,8 @@ class BHRDB(object):
         return_to_base_multiplier = settings.BHR['return_to_base_multiplier']
         return_to_base_factor = settings.BHR['return_to_base_factor']
 
+        duration = round(duration)
+
         #short time frame repeat offender
         if age <= max(minimum_time_window, time_window_factor * duration):
             return penalty_time_multiplier * duration
@@ -219,14 +221,14 @@ class BHRDB(object):
             if lb:
                 scaled_duration = max(duration, self.scale_duration(lb.age.total_seconds(), lb.duration.total_seconds()))
                 logger.info("Scaled duration from %d to %d", duration, scaled_duration)
+                print "Scaled duration from %d to %d" % (duration, scaled_duration)
                 duration = scaled_duration
 
+        now = timezone.now()
         if duration and not unblock_at:
-            unblock_at = timezone.now() + datetime.timedelta(seconds=duration)
+            unblock_at = now + datetime.timedelta(seconds=duration)
 
-
-
-        b = Block(cidr=cidr, who=who, source=source, why=why, unblock_at=unblock_at, skip_whitelist=skip_whitelist)
+        b = Block(cidr=cidr, who=who, source=source, why=why, added=now, unblock_at=unblock_at, skip_whitelist=skip_whitelist)
         b.save()
         return b
 
