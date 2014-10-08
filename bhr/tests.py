@@ -1,9 +1,11 @@
 from django.contrib.auth.models import User, Permission
 from django.test import TestCase
+from django.utils import timezone
+import datetime
 import json
 import csv
 
-from bhr.models import BHRDB, WhitelistEntry, is_whitelisted
+from bhr.models import BHRDB, Block, WhitelistEntry, is_whitelisted
 
 # Create your tests here.
 
@@ -233,6 +235,36 @@ class DBTests(TestCase):
         self.assertEqual(bool(is_whitelisted("141.142.4.0/24")), True)
         self.assertEqual(bool(is_whitelisted("141.0.0.0/8")), True)
 
+class ScalingTests(TestCase):
+    def setUp(self):
+        self.db = BHRDB()
+        self.user = User.objects.create_user('admin', 'a@b.com', 'admin')
+
+    def add_older_block(self, age, duration):
+        now = timezone.now()
+        before = now - datetime.timedelta(seconds=age)
+        unblock_at = before + datetime.timedelta(seconds=duration)
+        b = Block(cidr='1.2.3.4', who=self.user, source='test', why='test', unblock_at=unblock_at)
+        b.save()
+        b.added = before
+        b.save()
+        return b
+
+    def test_get_last_block(self):
+        b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing', duration=10)
+        lb = self.db.get_last_block('1.2.3.4')
+
+        self.assertAlmostEqual(lb.duration.total_seconds(), 10, places=2)
+
+    def test_block_scaled_normal(self):
+        now = timezone.now()
+        before = now - datetime.timedelta(minutes=20)
+        unblock_at = before + datetime.timedelta(seconds=300)
+        b = self.add_older_block(60*60, 60*5)
+        b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing', duration=10, autoscale=True)
+        lb = self.db.get_last_block('1.2.3.4')
+
+        self.assertAlmostEqual(lb.duration.total_seconds(), 600, places=2)
 
 
 from rest_framework.test import APITestCase
