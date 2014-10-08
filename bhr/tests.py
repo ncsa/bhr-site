@@ -256,15 +256,25 @@ class ScalingTests(TestCase):
 
         self.assertAlmostEqual(lb.duration.total_seconds(), 10, places=2)
 
-    def test_block_scaled_normal(self):
-        now = timezone.now()
-        before = now - datetime.timedelta(minutes=20)
-        unblock_at = before + datetime.timedelta(seconds=300)
-        b = self.add_older_block(60*60, 60*5)
-        b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing', duration=10, autoscale=True)
+    def scale_test(self, age, duration, new_duration, expected_duration):
+        b = self.add_older_block(age, duration)
+        b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing', duration=new_duration, autoscale=True)
         lb = self.db.get_last_block('1.2.3.4')
+        self.assertAlmostEqual(lb.duration.total_seconds(), expected_duration, places=2)
 
-        self.assertAlmostEqual(lb.duration.total_seconds(), 600, places=2)
+    def test_block_scaled_short(self):
+        self.scale_test(
+            age=60*60,
+            duration=60*5,
+            new_duration=60*5,
+            expected_duration=60*10)
+
+    def test_block_scaled_medium(self):
+        self.scale_test(
+            age=60*60*24*4,
+            duration=60*60*24,
+            new_duration=60*60,
+            expected_duration=60*60*24)
 
 
 from rest_framework.test import APITestCase
