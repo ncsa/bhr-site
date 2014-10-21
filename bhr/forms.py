@@ -25,6 +25,8 @@ DURATION_CHOICES = (
     (60*60*24*7,    '1 Week'),
     (60*60*24*30,   '1 Month'),
     (60*60*24*30*3, '3 Months'),
+    (60*60*24*365,  '1 Year'),
+    (0,             'Indefinite'),
 )
 
 class AddBlockForm(forms.Form):
