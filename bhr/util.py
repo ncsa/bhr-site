@@ -31,3 +31,5 @@ def expand_time(text):
         if text.endswith(suff):
             number_part = text[:-len(suff)]
             return int(number_part) * time_suffixes[suff]
+
+    raise ValueError("Invalid duration %s" % text)

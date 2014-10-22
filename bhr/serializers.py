@@ -2,6 +2,8 @@ from bhr.models import WhitelistEntry, Block, BlockEntry
 from rest_framework import serializers
 from bhr.models import BHRDB, is_whitelisted
 
+from bhr.util import expand_time
+
 class WhitelistEntrySerializer(serializers.ModelSerializer):
     who = serializers.SlugField(read_only=True)
     added = serializers.SlugField(read_only=True)
@@ -46,10 +48,18 @@ class BlockRequestSerializer(serializers.Serializer):
     cidr = serializers.CharField(max_length=20)
     source = serializers.CharField(max_length=30)
     why = serializers.CharField()
-    duration = serializers.IntegerField(required=False)
+    duration = serializers.CharField(required=False)
     unblock_at = serializers.DateTimeField(required=False)
     skip_whitelist = serializers.BooleanField(default=False)
     autoscale = serializers.BooleanField(default=False)
+
+    def validate_duration(self, attrs, source):
+        value = attrs[source]
+        try:
+            expand_time(value)
+        except ValueError:
+            raise serializers.ValidationError("Invalid duration")
+        return attrs
 
     def validate(self, attrs):
         if attrs.get('duration') and attrs.get('unblock_at'):

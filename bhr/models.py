@@ -12,6 +12,9 @@ import datetime
 from django.conf import settings
 
 import logging
+
+from bhr.util import expand_time
+
 logger = logging.getLogger(__name__)
 
 class WhitelistError(Exception):
@@ -215,6 +218,9 @@ class BHRDB(object):
         b = self.get_block(cidr)
         if b:
             return b
+
+        if duration:
+            duration = expand_time(duration)
 
         if duration and autoscale:
             lb = self.get_last_block(cidr)
