@@ -6,6 +6,7 @@ import json
 import csv
 
 from bhr.models import BHRDB, Block, WhitelistEntry, is_whitelisted
+from bhr.util import expand_time
 
 # Create your tests here.
 
@@ -562,3 +563,20 @@ class ApiTest(TestCase):
 
         blocks = self.client.get("/bhr/api/expected_blocks/?source=two").data
         self.assertEqual(len(blocks), 2)
+
+class UtilTest(TestCase):
+    def test_expand_time(self):
+        cases = [
+            ('10',      10),
+            ('10s',     10),
+            ('7m',      7*60),
+            ('14m',     14*60),
+            ('4h',      4*60*60),
+            ('22h',     22*60*60),
+            ('3d',      3*60*60*24),
+            ('3mo',     3*60*60*24*30),
+            ('2y',      2*60*60*24*365),
+        ]
+
+        for text, number in cases:
+            self.assertEqual(expand_time(text), number)
