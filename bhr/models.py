@@ -11,6 +11,7 @@ import datetime
 
 from django.conf import settings
 
+from urllib import quote
 import logging
 
 from bhr.util import expand_time
@@ -226,9 +227,8 @@ class BHRDB(object):
             lb = self.get_last_block(cidr)
             if lb:
                 scaled_duration = max(duration, self.scale_duration(lb.age.total_seconds(), lb.duration.total_seconds()))
-                logger.info("Scaled duration from %d to %d", duration, scaled_duration)
-                print "Scaled duration from %d to %d" % (duration, scaled_duration)
                 duration = scaled_duration
+                logger.debug("Scaled duration from %d to %d", duration, scaled_duration)
 
         now = timezone.now()
         if duration and not unblock_at:
@@ -236,6 +236,8 @@ class BHRDB(object):
 
         b = Block(cidr=cidr, who=who, source=source, why=why, added=now, unblock_at=unblock_at, skip_whitelist=skip_whitelist)
         b.save()
+
+        logger.info('BLOCK IP=%s WHO=%s SOURCE=%s WHY=%s UNTIL="%s" DURATION=%s', cidr, who, source, quote(why), unblock_at, duration)
         return b
 
     def unblock_now(self, cidr, why):
@@ -246,12 +248,14 @@ class BHRDB(object):
         b.unblock_now(why)
 
     def set_blocked(self, b, ident):
+        logger.info("SET_BLOCKED ID=%s IP=%s IDENT=%s", b.id, b.cidr, ident)
         return b.blockentry_set.create(ident=ident)
 
     def set_unblocked(self, b, ident):
         b = b.blockentry_set.get(ident=ident)
         b.set_unblocked()
         b.save()
+        logger.info("SET_UNBLOCKED ID=%s IP=%s IDENT=%s", b.id, b.block.cidr, ident)
 
     def set_unblocked_by_blockentry_id(self, block_id):
         b = BlockEntry.objects.get(pk=block_id)
@@ -284,6 +288,7 @@ class BHRDB(object):
             for id in ids:
                 block = Block.objects.get(pk=id)
                 block.blockentry_set.create(ident=ident)
+                logger.info("SET_BLOCKED ID=%s IP=%s IDENT=%s", id, block.cidr, ident)
 
     def set_unblocked_multi(self, ids):
         with transaction.atomic():
@@ -291,6 +296,7 @@ class BHRDB(object):
                 entry = BlockEntry.objects.get(pk=id)
                 entry.set_unblocked()
                 entry.save()
+                logger.info("SET_UNBLOCKED ID=%s IP=%s IDENT=%s", id, entry.block.cidr, entry.ident)
 
     def get_history(self, cidr):
         return Block.objects.filter(cidr__in_cidr=cidr).select_related('who').order_by('-added')
