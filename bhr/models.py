@@ -255,7 +255,7 @@ class BHRDB(object):
         b = b.blockentry_set.get(ident=ident)
         b.set_unblocked()
         b.save()
-        logger.info("SET_UNBLOCKED ID=%s IP=%s IDENT=%s", b.id, b.block.cidr, ident)
+        logger.info("SET_UNBLOCKED ID=%s IP=%s IDENT=%s", b.block.id, b.block.cidr, ident)
 
     def set_unblocked_by_blockentry_id(self, block_id):
         b = BlockEntry.objects.get(pk=block_id)
@@ -296,7 +296,7 @@ class BHRDB(object):
                 entry = BlockEntry.objects.get(pk=id)
                 entry.set_unblocked()
                 entry.save()
-                logger.info("SET_UNBLOCKED ID=%s IP=%s IDENT=%s", id, entry.block.cidr, entry.ident)
+                logger.info("SET_UNBLOCKED ID=%s IP=%s IDENT=%s", entry.block.id, entry.block.cidr, entry.ident)
 
     def get_history(self, cidr):
         return Block.objects.filter(cidr__in_cidr=cidr).select_related('who').order_by('-added')
