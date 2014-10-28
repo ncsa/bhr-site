@@ -1,7 +1,7 @@
 Django==1.7
 Pygments==1.6
 certifi==14.05.14
-django-netfields==0.2.2
+-e git+git://github.com/JustinAzoff/django-postgresql-netfields.git#egg=django-netfields
 djangorestframework==2.4.2
 ipaddr==2.1.11
 netaddr==0.7.12
