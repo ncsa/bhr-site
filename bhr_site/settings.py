@@ -132,3 +132,8 @@ BHR = {
     'return_to_base_multiplier':    2.0,
     'return_to_base_factor':        2.0,
 }
+
+try:
+    from settings_local import *
+except ImportError:
+    pass
