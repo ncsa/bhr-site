@@ -42,7 +42,6 @@ class AddBlockForm(forms.Form):
     def clean(self):
         cleaned_data = super(AddBlockForm, self).clean()
         check_whitelist(cleaned_data)
-        print cleaned_data
         return cleaned_data
 
 class QueryBlockForm(forms.Form):
