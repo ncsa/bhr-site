@@ -149,14 +149,14 @@ class DBTests(TestCase):
         expected = self.db.expected().all()
         self.assertEqual(len(expected), 1)
 
-        self.db.unblock_now('1.2.3.4', 'testing')
+        self.db.unblock_now('1.2.3.4', self.user, 'testing')
 
         expected = self.db.expected().all()
         self.assertEqual(len(expected), 0)
 
     def test_unblock_now_moves_to_pending_removal(self):
         b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing')
-        self.db.unblock_now('1.2.3.4', 'testing')
+        self.db.unblock_now('1.2.3.4', self.user, 'testing')
 
         #it needs to be blocked on a host to be able to be pending unblock
         self.db.set_blocked(b1, 'bgp1')
@@ -179,7 +179,7 @@ class DBTests(TestCase):
         b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing', duration=1)
         self.db.set_blocked(b1, 'bgp1')
 
-        self.db.unblock_now('1.2.3.4', 'testing')
+        self.db.unblock_now('1.2.3.4', self.user, 'testing')
 
         q = self.db.unblock_queue('bgp1')
         self.assertEqual(len(q), 1)
@@ -194,7 +194,7 @@ class DBTests(TestCase):
     def test_set_unblocked_removes_from_unblock_queue(self):
         b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing')
         self.db.set_blocked(b1, 'bgp1')
-        self.db.unblock_now('1.2.3.4', 'testing')
+        self.db.unblock_now('1.2.3.4', self.user, 'testing')
 
         q = self.db.unblock_queue('bgp1')
         self.assertEqual(len(q), 1)
@@ -220,7 +220,7 @@ class DBTests(TestCase):
         self.db.set_blocked(b1, 'bgp1')
         check_counts(current=1, expected=1)
 
-        self.db.unblock_now('1.2.3.4', 'testing')
+        self.db.unblock_now('1.2.3.4', self.user, 'testing')
         check_counts(current=1, expected=0, unblock_pending=1)
 
         self.db.set_unblocked(b1, 'bgp1')

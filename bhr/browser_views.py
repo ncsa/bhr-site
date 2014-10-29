@@ -63,7 +63,7 @@ class DoUnblockView(FormView):
         block_ids = map(int, block_ids)
         blocks = Block.objects.filter(id__in=block_ids).all()
         for b in blocks:
-            b.unblock_now(why)
+            b.unblock_now(self.request.user, why)
         return redirect(reverse("query") + "?cidr=" + query)
 
 class StatsView(TemplateView):

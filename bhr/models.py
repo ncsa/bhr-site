@@ -102,6 +102,7 @@ class Block(models.Model):
 
     forced_unblock  = models.BooleanField(default=False, db_index=True)
     unblock_why = models.TextField(blank=True)
+    unblock_who = models.ForeignKey(User, related_name='+', null=True, blank=True)
 
     objects = models.Manager()
     current = CurrentBlockManager()
@@ -145,8 +146,9 @@ class Block(models.Model):
             return None
         return timezone.now() - self.unblock_at
 
-    def unblock_now(self, why):
+    def unblock_now(self, who, why):
         self.forced_unblock = True
+        self.unblock_who = who
         self.unblock_why = why
         self.save()
 
@@ -240,12 +242,12 @@ class BHRDB(object):
         logger.info('BLOCK IP=%s WHO=%s SOURCE=%s WHY=%s UNTIL="%s" DURATION=%s', cidr, who, source, quote(why), unblock_at, duration)
         return b
 
-    def unblock_now(self, cidr, why):
+    def unblock_now(self, cidr, who, why):
         b = self.get_block(cidr)
         if not b:
             raise Exception("%s is not blocked" % cidr)
 
-        b.unblock_now(why)
+        b.unblock_now(who, why)
 
     def set_blocked(self, b, ident):
         logger.info("SET_BLOCKED ID=%s IP=%s IDENT=%s", b.id, b.cidr, ident)

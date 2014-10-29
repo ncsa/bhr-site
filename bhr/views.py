@@ -153,7 +153,7 @@ class unblock_now(APIView):
         serializer = UnblockNowSerializer(data=request.DATA)
         if serializer.is_valid():
             d = serializer.data
-            BHRDB().unblock_now(d['cidr'], d['why'])
+            BHRDB().unblock_now(d['cidr'], request.user, d['why'])
             return Response({'status': 'ok'})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
