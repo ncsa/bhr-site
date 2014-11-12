@@ -201,3 +201,9 @@ def bhlist(request):
     resp = []
     blocks = BHRDB().expected().values_list('cidr','who__username','source','why', 'added', 'unblock_at')
     return respond_csv(blocks, ["cidr", "who", "source", "why", "added", "unblock_at"])
+
+@api_view(["GET"])
+def bhlistpub(request):
+    resp = []
+    blocks = BHRDB().expected().values_list('cidr', 'added', 'unblock_at')
+    return respond_csv(blocks, ["cidr", "added", "unblock_at"])
