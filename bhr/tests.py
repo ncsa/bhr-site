@@ -257,6 +257,11 @@ class ScalingTests(TestCase):
 
         self.assertAlmostEqual(lb.duration.total_seconds(), 10, places=2)
 
+    def test_that_scaling_doesnt_break_with_manual_unblock(self):
+        b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing', duration=None)
+        self.db.unblock_now('1.2.3.4', self.user, 'testing')
+        b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing', duration=300, autoscale=True)
+
     def scale_test(self, age, duration, new_duration, expected_duration):
         b = self.add_older_block(age, duration)
         b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing', duration=new_duration, autoscale=True)

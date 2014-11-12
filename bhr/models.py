@@ -150,6 +150,7 @@ class Block(models.Model):
         self.forced_unblock = True
         self.unblock_who = who
         self.unblock_why = why
+        self.unblock_at = timezone.now()
         self.save()
 
 class BlockEntry(models.Model):
@@ -227,8 +228,9 @@ class BHRDB(object):
 
         if duration and autoscale:
             lb = self.get_last_block(cidr)
-            if lb:
-                scaled_duration = max(duration, self.scale_duration(lb.age.total_seconds(), lb.duration.total_seconds()))
+            if lb and lb.duration:
+                last_duration = lb.duration and lb.duration.total_seconds() or duration
+                scaled_duration = max(duration, self.scale_duration(lb.age.total_seconds(), last_duration))
                 duration = scaled_duration
                 logger.debug("Scaled duration from %d to %d", duration, scaled_duration)
 
