@@ -10,7 +10,7 @@ clients implementing blocks.
 
 Blocks flow through the system like so:
 
-* A BHR Client calls block(cidr='192.168.254.254', source='readme', why='because!', duration=300)
+* A BHR Client calls `block(cidr='192.168.254.254', source='readme', why='because!', duration=300)`
 * This entry is now in the system but not marked as blocked.
 * A BHR Client calls `get_block_queue()` which will return a list containing that record
 * That BHR Client will then add a firewall rule, bgp entry, whatever
