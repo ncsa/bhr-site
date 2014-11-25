@@ -226,6 +226,15 @@ class DBTests(TestCase):
         self.db.set_unblocked(b1, 'bgp1')
         check_counts()
 
+    def test_source_stats(self):
+        b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing')
+
+        self.assertEqual(self.db.source_stats(), {"test": 1})
+
+        b1 = self.db.add_block('1.2.3.5', self.user, 'other', 'testing')
+        b1 = self.db.add_block('1.2.3.6', self.user, 'other', 'testing')
+        self.assertEqual(self.db.source_stats(), {"test": 1, "other": 2})
+
     def test_whitelist(self):
         WhitelistEntry(who=self.user, why='test', cidr='141.142.0.0/16').save()
 

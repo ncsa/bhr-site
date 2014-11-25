@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Q
-from django.db import transaction
+from django.db import transaction, connection
 
 from netfields import CidrAddressField
 from netaddr import IPNetwork
@@ -313,6 +313,17 @@ class BHRDB(object):
         ret['expected'] = self.expected().count()
 
         return ret
+
+    def source_stats(self):
+        stats = {}
+        with connection.cursor() as c:
+            c.execute('''SELECT source, count(source) from bhr_block
+                WHERE (unblock_at > now() OR unblock_at IS NULL)
+                AND forced_unblock=false
+                GROUP BY source''')
+            for source, count in c.fetchall():
+                stats[source] = count
+        return stats
 
 
 class InCidr(models.Lookup):
