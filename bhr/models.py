@@ -320,7 +320,8 @@ class BHRDB(object):
             c.execute('''SELECT source, count(source) from bhr_block
                 WHERE (unblock_at > now() OR unblock_at IS NULL)
                 AND forced_unblock=false
-                GROUP BY source''')
+                GROUP BY source
+                ORDER BY source ASC''')
             for source, count in c.fetchall():
                 stats[source] = count
         return stats

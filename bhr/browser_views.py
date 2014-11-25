@@ -69,4 +69,8 @@ class DoUnblockView(FormView):
 class StatsView(TemplateView):
     template_name = "bhr/stats.html"
     def get_context_data(self, *args):
-        return {'stats': BHRDB().stats()}
+        db = BHRDB()
+        return {
+            'stats': db.stats(),
+            'source_stats': db.source_stats(),
+        }

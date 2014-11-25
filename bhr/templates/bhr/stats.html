@@ -12,4 +12,10 @@
 
 <h3> Unblock Pending {{ stats.unblock_pending }} </h3>
 
+<h2> Source Stats </h2>
+
+{% for source, count in source_stats.items %}
+    <h3> {{ source }} {{ count }} </h3>
+{% endfor %}
+
 {% endblock %}
