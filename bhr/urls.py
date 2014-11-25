@@ -33,7 +33,7 @@ urlpatterns = patterns('',
     url(r'^api/unblock_queue/(?P<ident>.+)', views.UnBlockQueue.as_view()),
     url(r'^api/query/(?P<cidr>.+)', views.BlockHistory.as_view()),
 
-    url('^$', browser_views.IndexView.as_view()),
+    url('^$', browser_views.IndexView.as_view(), name="home"),
     url('^add$', permission_required('bhr.add_block')(browser_views.AddView.as_view()), name="add"),
     url('^query$', login_required(browser_views.QueryView.as_view()), name="query"),
     url('^unblock$', permission_required('bhr.edit_block')(browser_views.UnblockView.as_view()), name="unblock"),
