@@ -74,3 +74,9 @@ class StatsView(TemplateView):
             'stats': db.stats(),
             'source_stats': db.source_stats(),
         }
+
+class ListView(TemplateView):
+    template_name = "bhr/list.html"
+    def get_context_data(self, *args):
+        blocks = BHRDB().expected().values('id', 'cidr','who__username','source','why', 'added', 'unblock_at')
+        return { 'blocks': blocks}
