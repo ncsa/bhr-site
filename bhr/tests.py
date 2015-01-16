@@ -342,11 +342,6 @@ class ApiTest(TestCase):
         response = self._add_block(cidr='1.0.0.0/8', skip_whitelist=True)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    def test_block_skip_whitelist(self):
-        WhitelistEntry(who=self.user, why='test', cidr='1.2.3.0/24').save()
-        response = self._add_block()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
     def test_block_queue(self):
         data = self.client.get("/bhr/api/queue/bgp1").data
         self.assertEqual(len(data), 0)
