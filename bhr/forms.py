@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from bhr.models import is_whitelisted
+from bhr.models import is_whitelisted, is_prefixlen_too_small
 from netfields.forms import CidrAddressFormField
 
 def check_whitelist(cleaned_data):
@@ -10,6 +10,8 @@ def check_whitelist(cleaned_data):
         item = is_whitelisted(cidr)
         if item:
             raise forms.ValidationError("whitelisted: %s: %s" % (item.who, item.why))
+        if is_prefixlen_too_small(cidr):
+            raise forms.ValidationError("Prefix length in %s is too small" % cidr)
     return cleaned_data
 
 class BlockForm(ModelForm):

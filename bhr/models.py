@@ -21,21 +21,27 @@ logger = logging.getLogger(__name__)
 class WhitelistError(Exception):
     pass
 
+class PrefixLenTooSmallError(Exception):
+    pass
+
 def is_whitelisted(cidr):
     cidr = IPNetwork(cidr)
-    minimum_prefixlen = settings.BHR.get('minimum_prefixlen', 24)
-    if cidr.prefixlen < minimum_prefixlen:
-        return True
     for item in WhitelistEntry.objects.all():
         if cidr in item.cidr or item.cidr in cidr:
             return item
     return False
+
+def is_prefixlen_too_small(cidr):
+    minimum_prefixlen = settings.BHR.get('minimum_prefixlen', 24)
+    cidr = IPNetwork(cidr)
+    return cidr.prefixlen < minimum_prefixlen
 
 class WhitelistEntry(models.Model):
     cidr = CidrAddressField()
     who = models.ForeignKey(User)
     why = models.TextField()
     added = models.DateTimeField('date added', auto_now_add=True)
+
 
 class CurrentBlockManager(models.Manager):
     def get_queryset(self):
@@ -119,6 +125,8 @@ class Block(models.Model):
             wle = is_whitelisted(self.cidr)
             if wle:
                 raise WhitelistError(wle.why)
+            if is_prefixlen_too_small(self.cidr):
+                raise PrefixLenTooSmallError("Prefix length in %s is too small" % self.cidr)
         super(Block, self).save(*args, **kwargs)
 
     @property

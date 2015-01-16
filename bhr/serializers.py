@@ -1,6 +1,6 @@
 from bhr.models import WhitelistEntry, Block, BlockEntry
 from rest_framework import serializers
-from bhr.models import BHRDB, is_whitelisted
+from bhr.models import BHRDB, is_whitelisted, is_prefixlen_too_small
 
 from bhr.util import expand_time
 
@@ -71,6 +71,8 @@ class BlockRequestSerializer(serializers.Serializer):
             item = is_whitelisted(cidr)
             if item:
                 raise serializers.ValidationError("whitelisted: %s: %s" % (item.who, item.why))
+            if is_prefixlen_too_small(cidr):
+                raise serializers.ValidationError("Prefix length in %s is too small" % cidr)
 
         return attrs
 

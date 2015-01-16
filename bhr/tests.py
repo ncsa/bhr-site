@@ -5,7 +5,7 @@ import datetime
 import json
 import csv
 
-from bhr.models import BHRDB, Block, WhitelistEntry, is_whitelisted
+from bhr.models import BHRDB, Block, WhitelistEntry, is_whitelisted, is_prefixlen_too_small
 from bhr.util import expand_time
 
 # Create your tests here.
@@ -245,10 +245,10 @@ class DBTests(TestCase):
         self.assertEqual(bool(is_whitelisted("141.142.4.0/24")), True)
         self.assertEqual(bool(is_whitelisted("141.0.0.0/8")), True)
 
-    def test_whitelist_large_network(self):
-        self.assertEqual(bool(is_whitelisted("1.2.3.4")), False)
-        self.assertEqual(bool(is_whitelisted("1.2.3.4/24")), False)
-        self.assertEqual(bool(is_whitelisted("1.2.3.4/20")), True)
+    def test_prefixlen_too_small(self):
+        self.assertEqual(bool(is_prefixlen_too_small("1.2.3.4")), False)
+        self.assertEqual(bool(is_prefixlen_too_small("1.2.3.4/24")), False)
+        self.assertEqual(bool(is_prefixlen_too_small("1.2.3.4/20")), True)
 
 
 class ScalingTests(TestCase):
@@ -334,6 +334,18 @@ class ApiTest(TestCase):
 
         response = self._add_block(skip_whitelist=True)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_block_prefixlen_too_small(self):
+        response = self._add_block(cidr='1.0.0.0/8')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        response = self._add_block(cidr='1.0.0.0/8', skip_whitelist=True)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_block_skip_whitelist(self):
+        WhitelistEntry(who=self.user, why='test', cidr='1.2.3.0/24').save()
+        response = self._add_block()
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_block_queue(self):
         data = self.client.get("/bhr/api/queue/bgp1").data
