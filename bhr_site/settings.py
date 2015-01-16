@@ -131,6 +131,8 @@ BHR = {
     'penalty_time_multiplier':      2.0,
     'return_to_base_multiplier':    2.0,
     'return_to_base_factor':        2.0,
+
+    'minimum_prefixlen': 23,
 }
 
 try:

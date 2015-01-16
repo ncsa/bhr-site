@@ -245,6 +245,12 @@ class DBTests(TestCase):
         self.assertEqual(bool(is_whitelisted("141.142.4.0/24")), True)
         self.assertEqual(bool(is_whitelisted("141.0.0.0/8")), True)
 
+    def test_whitelist_large_network(self):
+        self.assertEqual(bool(is_whitelisted("1.2.3.4")), False)
+        self.assertEqual(bool(is_whitelisted("1.2.3.4/24")), False)
+        self.assertEqual(bool(is_whitelisted("1.2.3.4/20")), True)
+
+
 class ScalingTests(TestCase):
     def setUp(self):
         self.db = BHRDB()
