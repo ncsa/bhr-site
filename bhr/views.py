@@ -196,11 +196,13 @@ def stats(request):
     return Response(stats)
 
 from bhr.util import respond_csv
-@api_view(["GET"])
-def bhlist(request):
-    resp = []
-    blocks = BHRDB().expected().values_list('cidr','who__username','source','why', 'added', 'unblock_at')
-    return respond_csv(blocks, ["cidr", "who", "source", "why", "added", "unblock_at"])
+class bhlist(APIView):
+    permission_classes = [DjangoModelPermissions]
+    queryset = Block.objects.none()  # Required for DjangoModelPermissions
+    def get(self, request):
+        resp = []
+        blocks = BHRDB().expected().values_list('cidr','who__username','source','why', 'added', 'unblock_at')
+        return respond_csv(blocks, ["cidr", "who", "source", "why", "added", "unblock_at"])
 
 @api_view(["GET"])
 def bhlistpub(request):

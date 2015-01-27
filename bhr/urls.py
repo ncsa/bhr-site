@@ -40,6 +40,6 @@ urlpatterns = patterns('',
     url('^do_unblock$', permission_required('bhr.change_block')(browser_views.DoUnblockView.as_view()), name="do_unblock"),
     url(r'^stats$', browser_views.StatsView.as_view(), name="stats"),
     url(r'^list$', login_required(browser_views.ListView.as_view()), name="list"),
-    url(r'^list.csv', login_required(views.bhlist), name='csv'),
+    url(r'^list.csv', views.bhlist.as_view(), name='csv'),
     url(r'^publist.csv', views.bhlistpub, name='pubcsv'),
 )
