@@ -1,4 +1,4 @@
-Django==1.7
+Django==1.7.4
 Pygments==1.6
 certifi==14.05.14
 -e git+git://github.com/JustinAzoff/django-postgresql-netfields.git#egg=django-netfields
