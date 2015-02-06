@@ -1,10 +1,11 @@
 from django import forms
 from django.forms import ModelForm
-from bhr.models import is_whitelisted, is_prefixlen_too_small
+from bhr.models import is_whitelisted, is_prefixlen_too_small, is_source_blacklisted
 from netfields.forms import CidrAddressFormField
 
 def check_whitelist(cleaned_data):
     cidr = cleaned_data.get('cidr')
+    source = cleaned_data.get('source')
     skip_whitelist = cleaned_data.get('skip_whitelist')
     if cidr and not skip_whitelist:
         item = is_whitelisted(cidr)
@@ -12,6 +13,9 @@ def check_whitelist(cleaned_data):
             raise forms.ValidationError("whitelisted: %s: %s" % (item.who, item.why))
         if is_prefixlen_too_small(cidr):
             raise forms.ValidationError("Prefix length in %s is too small" % cidr)
+        item = is_source_blacklisted(source)
+        if item:
+            raise forms.ValidationError("Source %s is blacklisted: %s: %s" % (source, item.who, item.why))
     return cleaned_data
 
 class BlockForm(ModelForm):

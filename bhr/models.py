@@ -24,6 +24,9 @@ class WhitelistError(Exception):
 class PrefixLenTooSmallError(Exception):
     pass
 
+class SourceBlacklistedError(Exception):
+    pass
+
 def is_whitelisted(cidr):
     cidr = IPNetwork(cidr)
     for item in WhitelistEntry.objects.all():
@@ -35,6 +38,9 @@ def is_prefixlen_too_small(cidr):
     minimum_prefixlen = settings.BHR.get('minimum_prefixlen', 24)
     cidr = IPNetwork(cidr)
     return cidr.prefixlen < minimum_prefixlen
+
+def is_source_blacklisted(source):
+    return False
 
 class WhitelistEntry(models.Model):
     cidr = CidrAddressField()
@@ -127,6 +133,9 @@ class Block(models.Model):
                 raise WhitelistError(wle.why)
             if is_prefixlen_too_small(self.cidr):
                 raise PrefixLenTooSmallError("Prefix length in %s is too small" % self.cidr)
+            item = is_source_blacklisted(self.source)
+            if item:
+                raise SourceBlacklistedError("Source %s is blacklisted: %s: %s" % (self.source, item.who, item.why))
         super(Block, self).save(*args, **kwargs)
 
     @property
