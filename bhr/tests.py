@@ -5,7 +5,7 @@ import datetime
 import json
 import csv
 
-from bhr.models import BHRDB, Block, WhitelistEntry, is_whitelisted, is_prefixlen_too_small
+from bhr.models import BHRDB, Block, WhitelistEntry, SourceBlacklistEntry, is_whitelisted, is_prefixlen_too_small, is_source_blacklisted
 from bhr.util import expand_time
 
 # Create your tests here.
@@ -250,6 +250,10 @@ class DBTests(TestCase):
         self.assertEqual(bool(is_prefixlen_too_small("1.2.3.4/24")), False)
         self.assertEqual(bool(is_prefixlen_too_small("1.2.3.4/20")), True)
 
+    def test_source_blacklisted(self):
+        self.assertEqual(bool(is_source_blacklisted("test")), False)
+        SourceBlacklistEntry(who=self.user, why='test', source='test').save()
+        self.assertEqual(bool(is_source_blacklisted("test")), True)
 
 class ScalingTests(TestCase):
     def setUp(self):
@@ -329,6 +333,14 @@ class ApiTest(TestCase):
 
     def test_block_skip_whitelist(self):
         WhitelistEntry(who=self.user, why='test', cidr='1.2.3.0/24').save()
+        response = self._add_block()
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        response = self._add_block(skip_whitelist=True)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_block_source_blacklist(self):
+        SourceBlacklistEntry(who=self.user, why='test', source='test').save()
         response = self._add_block()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 

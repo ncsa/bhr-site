@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.db.models import Q
 from django.db import transaction, connection
@@ -40,7 +41,11 @@ def is_prefixlen_too_small(cidr):
     return cidr.prefixlen < minimum_prefixlen
 
 def is_source_blacklisted(source):
-    return False
+    try :
+        entry = SourceBlacklistEntry.objects.get(source=source)
+        return entry
+    except ObjectDoesNotExist:
+        return False
 
 class WhitelistEntry(models.Model):
     cidr = CidrAddressField()

@@ -1,6 +1,6 @@
 from bhr.models import WhitelistEntry, Block, BlockEntry
 from rest_framework import serializers
-from bhr.models import BHRDB, is_whitelisted, is_prefixlen_too_small
+from bhr.models import BHRDB, is_whitelisted, is_prefixlen_too_small, is_source_blacklisted
 
 from bhr.util import expand_time
 
@@ -66,6 +66,7 @@ class BlockRequestSerializer(serializers.Serializer):
             raise serializers.ValidationError("Specify only one of duration and unblock_at")
 
         cidr = attrs.get('cidr')
+        source = attrs.get('source')
         skip_whitelist = attrs.get('skip_whitelist')
         if cidr and not skip_whitelist:
             item = is_whitelisted(cidr)
@@ -73,6 +74,9 @@ class BlockRequestSerializer(serializers.Serializer):
                 raise serializers.ValidationError("whitelisted: %s: %s" % (item.who, item.why))
             if is_prefixlen_too_small(cidr):
                 raise serializers.ValidationError("Prefix length in %s is too small" % cidr)
+            item = is_source_blacklisted(source)
+            if item:
+                raise serializers.ValidationError("Source %s is blacklisted: %s: %s" % (source, item.who, item.why))
 
         return attrs
 
