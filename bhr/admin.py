@@ -1,8 +1,8 @@
 from django.contrib import admin
 
 # Register your models here.
-from bhr.models import WhitelistEntry, Block, BlockEntry
-from bhr.forms import BlockForm
+from bhr.models import WhitelistEntry, SourceBlacklistEntry, Block, BlockEntry
+from bhr.forms import BlockForm, AddSourceBlacklistForm
 
 def force_unblock(modeladmin, request, queryset):
     queryset.update(forced_unblock=True)
@@ -42,6 +42,11 @@ class WhitelistAdmin(AutoWho):
     list_filter = ('who', )
     list_display = ('cidr', 'who', 'why')
 
+class SourceBlacklistAdmin(AutoWho):
+    list_display = ('source', 'who', 'why')
 
+    form = AddSourceBlacklistForm
+
+admin.site.register(SourceBlacklistEntry, SourceBlacklistAdmin)
 admin.site.register(WhitelistEntry, WhitelistAdmin)
 admin.site.register(Block, BlockAdmin)

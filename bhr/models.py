@@ -48,6 +48,11 @@ class WhitelistEntry(models.Model):
     why = models.TextField()
     added = models.DateTimeField('date added', auto_now_add=True)
 
+class SourceBlacklistEntry(models.Model):
+    source = models.CharField(max_length=30, unique=True)
+    who = models.ForeignKey(User)
+    why = models.TextField()
+    added = models.DateTimeField('date added', auto_now_add=True)
 
 class CurrentBlockManager(models.Manager):
     def get_queryset(self):

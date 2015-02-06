@@ -57,3 +57,9 @@ class UnblockForm(forms.Form):
     block_ids = forms.CharField(max_length=1000, widget=forms.HiddenInput())
     query = forms.CharField(max_length=30, widget=forms.HiddenInput())
     why = forms.CharField(widget=forms.Textarea)
+
+class AddSourceBlacklistForm(ModelForm):
+    source = forms.CharField()
+    why = forms.CharField(widget=forms.Textarea)
+    class Meta:
+        exclude = ('who',)
