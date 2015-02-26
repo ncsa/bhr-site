@@ -139,6 +139,6 @@ try:
     LOCAL_SETTINGS
 except NameError:
     try:
-        from local_settings import *
+        from settings_local import *
     except ImportError:
         pass
