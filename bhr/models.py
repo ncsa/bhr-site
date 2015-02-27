@@ -300,7 +300,7 @@ class BHRDB(object):
         return list(Block.objects.raw("""
             SELECT b.id as pk, * from bhr_block b
             LEFT JOIN bhr_blockentry be
-            ON b.id=be.block_id AND be.ident = %s
+            ON b.id=be.block_id AND be.ident = %s AND be.removed IS NULL
             WHERE
                 (b.unblock_at IS NULL OR
                  b.unblock_at > %s)
