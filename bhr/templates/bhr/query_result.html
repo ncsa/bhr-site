@@ -21,6 +21,7 @@
     <th>Why</th>
     <th>Added</th>
     <th>Unblock At</th>
+    <th>Duration</th>
 </tr>
 </thead>
 
@@ -38,6 +39,7 @@
         <td>{{ b.why }} </td>
         <td>{{ b.added }} </td>
         <td>{{ b.unblock_at }} </td>
+        <td>{{ b.added|timesince:b.unblock_at }} </td>
         <td>
             <table class="table table-striped table-bordered">
             <tr><th>Ident</th><th>Added</th><th>Removed</th></tr>
