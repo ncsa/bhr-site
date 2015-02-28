@@ -19,6 +19,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 import datetime
+import time
 
 from django.db import transaction
 
@@ -121,7 +122,17 @@ class BlockQueue(generics.ListAPIView):
 
     def get_queryset(self):
         ident = self.kwargs['ident']
-        return BHRDB().block_queue(ident, limit=200)
+        timeout = int(self.request.QUERY_PARAMS.get('timeout', 0))
+        if not timeout:
+            return BHRDB().block_queue(ident, limit=200)
+
+        end = time.time() + timeout
+        while time.time() < end:
+            blocks = BHRDB().block_queue(ident, limit=200)
+            if blocks:
+                return blocks
+            time.sleep(1.0)
+        return blocks
 
 class UnBlockQueue(generics.ListAPIView):
     serializer_class = UnBlockEntrySerializer
