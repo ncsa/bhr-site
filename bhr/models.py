@@ -268,8 +268,18 @@ class BHRDB(object):
         if duration and not unblock_at:
             unblock_at = now + datetime.timedelta(seconds=duration)
 
-        b = Block(cidr=cidr, who=who, source=source, why=why, added=now, unblock_at=unblock_at, skip_whitelist=skip_whitelist)
-        b.save()
+        with transaction.atomic():
+            b = Block(cidr=cidr, who=who, source=source, why=why, added=now, unblock_at=unblock_at, skip_whitelist=skip_whitelist)
+            b.save()
+
+            #It is possible that a block is added, and then after it expires, but before it is unblocked, a new block is added for that entry.
+            #In that case, allow the new block (since we don't know if a backend may have already unblocked the old one)
+            #but set the old record as already unblocked.  This should prevent a "block,block,unblock" timeline that results in the address
+            #ending up not actually blocked.
+            pending_unblock_records = BlockEntry.objects.filter(removed__isnull=True, block__cidr=cidr).all()
+            for e in pending_unblock_records:
+                e.set_unblocked()
+                e.save()
 
         logger.info('BLOCK IP=%s WHO=%s SOURCE=%s WHY=%s UNTIL="%s" DURATION=%s', cidr, who, source, quote(why), unblock_at, duration)
         return b

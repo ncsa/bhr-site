@@ -603,6 +603,24 @@ class ApiTest(TestCase):
         blocks = self.client.get("/bhr/api/expected_blocks/?source=two").data
         self.assertEqual(len(blocks), 2)
 
+    def test_double_block_race_condition(self):
+        #Add a short block and make sure bgp1 has it as blocked
+        self._add_block('1.1.1.1', source='one', duration=1)
+        block = self.client.get("/bhr/api/queue/bgp1").data[0]
+        self.client.post(block['set_blocked'], dict(ident='bgp1'))
+        sleep(2)
+
+        #now, it should be unblocked, so we can add a new one
+        self._add_block('1.1.1.1', source='one', duration=20000)
+
+        #at this point, to ensure that the block manager won't do a A:
+        # BLOCK
+        # BLOCK
+        # UNBLOCK
+        #We need to make sure that the original record does not show up in the unblock queue.
+        blocks = self.client.get("/bhr/api/unblock_queue/bgp1").data
+        self.assertEqual(len(blocks), 0)
+
 class UtilTest(TestCase):
     def test_expand_time(self):
         cases = [
