@@ -31,6 +31,9 @@ Configuration
 
 Create `bhr_site/settings_local.py` with something like:
 
+    LOCAL_SETTINGS = True  # do not touch
+    from settings import * # do not touch
+
     DEBUG = False
     ALLOWED_HOSTS = ['bhr.example.com', 'bhr']
 
