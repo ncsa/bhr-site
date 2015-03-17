@@ -52,7 +52,7 @@ class BlockRequestSerializer(serializers.Serializer):
     unblock_at = serializers.DateTimeField(required=False)
     skip_whitelist = serializers.BooleanField(default=False)
     autoscale = serializers.BooleanField(default=False)
-    extend = serializers.BooleanField(default=False)
+    extend = serializers.BooleanField(default=True)
 
     def validate_duration(self, attrs, source):
         value = attrs[source]
