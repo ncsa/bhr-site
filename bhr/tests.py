@@ -313,13 +313,14 @@ class ApiTest(TestCase):
         for perm in 'add_block change_block add_blockentry change_blockentry'.split():
             self.user.user_permissions.add(Permission.objects.get(codename=perm))
 
-    def _add_block(self, cidr='1.2.3.4', duration=30, skip_whitelist=0,source='test'):
+    def _add_block(self, cidr='1.2.3.4', duration=30, skip_whitelist=0,source='test', extend=False):
         return self.client.post('/bhr/api/block', dict(
             cidr=cidr,
             source=source,
             why='testing',
             duration=duration,
-            skip_whitelist=skip_whitelist
+            skip_whitelist=skip_whitelist,
+            extend=extend,
             ))
 
     def test_block(self):
@@ -620,6 +621,20 @@ class ApiTest(TestCase):
         #We need to make sure that the original record does not show up in the unblock queue.
         blocks = self.client.get("/bhr/api/unblock_queue/bgp1").data
         self.assertEqual(len(blocks), 0)
+
+    def test_block_extend_False(self):
+        self._add_block('1.1.1.1', source='one', duration=60)
+        self._add_block('1.1.1.1', source='one', duration=120, extend=False)
+        block = self.client.get("/bhr/api/query/1.1.1.1").data[0]
+        duration = (block['unblock_at'] - timezone.now()).seconds
+        self.assertLess(duration, 118)
+
+    def test_block_extend_True(self):
+        self._add_block('1.1.1.1', source='one', duration=60)
+        self._add_block('1.1.1.1', source='one', duration=120, extend=True)
+        block = self.client.get("/bhr/api/query/1.1.1.1").data[0]
+        duration = (block['unblock_at'] - timezone.now()).seconds
+        self.assertGreater(duration, 118)
 
 class UtilTest(TestCase):
     def test_expand_time(self):

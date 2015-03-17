@@ -40,6 +40,7 @@ class AddBlockForm(forms.Form):
     why = forms.CharField(widget=forms.Textarea)
     duration = forms.ChoiceField(choices=DURATION_CHOICES)
     skip_whitelist = forms.BooleanField(required=False)
+    extend = forms.BooleanField(label="Extend duration if existing block found",required=False)
 
     def clean_duration(self):
         d = self.cleaned_data['duration'] = int(self.cleaned_data['duration'])

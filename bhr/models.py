@@ -248,13 +248,22 @@ class BHRDB(object):
         #regular repeat offender
         return duration/return_to_base_factor;
 
-    def add_block(self, cidr, who, source, why, duration=None, unblock_at=None, skip_whitelist=False, autoscale=False):
-        b = self.get_block(cidr)
-        if b:
-            return b
-
+    def add_block(self, cidr, who, source, why, duration=None, unblock_at=None, skip_whitelist=False, extend=True, autoscale=False):
         if duration:
             duration = expand_time(duration)
+
+        now = timezone.now()
+        if duration and not unblock_at:
+            unblock_at = now + datetime.timedelta(seconds=duration)
+
+        b = self.get_block(cidr)
+        if b:
+            if extend is False or unblock_at <= b.unblock_at:
+                return b
+            b.unblock_at = unblock_at
+            logger.info('EXTEND IP=%s time extended UNTIL=%s DURATION=%s', cidr, unblock_at, duration)
+            b.save()
+            return b
 
         if duration and autoscale:
             lb = self.get_last_block(cidr)
@@ -264,9 +273,6 @@ class BHRDB(object):
                 duration = scaled_duration
                 logger.debug("Scaled duration from %d to %d", duration, scaled_duration)
 
-        now = timezone.now()
-        if duration and not unblock_at:
-            unblock_at = now + datetime.timedelta(seconds=duration)
 
         with transaction.atomic():
             b = Block(cidr=cidr, who=who, source=source, why=why, added=now, unblock_at=unblock_at, skip_whitelist=skip_whitelist)
