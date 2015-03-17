@@ -268,13 +268,15 @@ class ScalingTests(TestCase):
         b.save()
         b.added = before
         b.save()
+        self.db.set_blocked(b, 'bgp1')
+        self.db.set_unblocked(b, 'bgp1')
         return b
 
     def test_get_last_block(self):
         b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing', duration=10)
         lb = self.db.get_last_block('1.2.3.4')
 
-        self.assertAlmostEqual(lb.duration.total_seconds(), 10, places=2)
+        self.assertAlmostEqual(lb.duration.total_seconds(), 10, places=1)
 
     def test_that_scaling_doesnt_break_with_manual_unblock(self):
         b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing', duration=None)
@@ -285,7 +287,7 @@ class ScalingTests(TestCase):
         b = self.add_older_block(age, duration)
         b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing', duration=new_duration, autoscale=True)
         lb = self.db.get_last_block('1.2.3.4')
-        self.assertAlmostEqual(lb.duration.total_seconds(), expected_duration, places=2)
+        self.assertAlmostEqual(lb.duration.total_seconds(), expected_duration, places=1)
 
     def test_block_scaled_short(self):
         self.scale_test(
@@ -635,6 +637,12 @@ class ApiTest(TestCase):
         block = self.client.get("/bhr/api/query/1.1.1.1").data[0]
         duration = (block['unblock_at'] - timezone.now()).seconds
         self.assertGreater(duration, 118)
+
+    def test_block_extend_True_from_infinite_does_not_replace(self):
+        print self._add_block('1.1.1.1', source='one', duration=0)
+        print self._add_block('1.1.1.1', source='one', duration=120, extend=True)
+        block = self.client.get("/bhr/api/query/1.1.1.1").data[0]
+        self.assertEqual(block['unblock_at'], None)
 
 class UtilTest(TestCase):
     def test_expand_time(self):
