@@ -48,7 +48,7 @@ class BlockRequestSerializer(serializers.Serializer):
     cidr = serializers.CharField(max_length=20)
     source = serializers.CharField(max_length=30)
     why = serializers.CharField()
-    duration = serializers.CharField(required=False)
+    duration = serializers.CharField(required=True)
     unblock_at = serializers.DateTimeField(required=False)
     skip_whitelist = serializers.BooleanField(default=False)
     autoscale = serializers.BooleanField(default=False)
