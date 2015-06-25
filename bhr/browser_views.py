@@ -75,8 +75,16 @@ class StatsView(TemplateView):
             'source_stats': db.source_stats(),
         }
 
+def query_to_blocklist(q):
+    return q.values('id', 'cidr','who__username','source','why', 'added', 'unblock_at')
+
 class ListView(TemplateView):
     template_name = "bhr/list.html"
     def get_context_data(self, *args):
-        blocks = BHRDB().expected().values('id', 'cidr','who__username','source','why', 'added', 'unblock_at')
-        return { 'blocks': blocks}
+        all_blocks = BHRDB().expected()
+        manual_blocks = all_blocks.filter(Q(source="web") | Q(source="cli"))
+        auto_blocks = all_blocks.filter(~Q(source="web") | Q(source="cli")).order_by("-added")[:50]
+        return {
+            'manual_blocks': query_to_blocklist(manual_blocks),
+            'auto_blocks': query_to_blocklist(auto_blocks),
+        }

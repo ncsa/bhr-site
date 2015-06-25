@@ -11,39 +11,8 @@
     <input type="submit" value="Unblock Selected" />
     <input type="hidden" name="query" value="{{query}}" />
 
-<table class="table table-striped table-bordered">
-
-<thead>
-<tr>
-    <th>Unblock</th>
-    <th>Cidr</th>
-    <th>Who</th>
-    <th>Source</th>
-    <th>Why</th>
-    <th>Added</th>
-    <th>Unblock At</th>
-    <th>Duration</th>
-</tr>
-</thead>
-
-<tbody>
-{% for b in blocks %}
-    <tr>
-        <td>
-            <input type="checkbox" name="block_id" value="{{b.id}}">
-        </td>
-        <td>{{ b.cidr }} </td>
-        <td>{{ b.who__username }} </td>
-        <td>{{ b.source }} </td>
-        <td>{{ b.why }} </td>
-        <td>{{ b.added }} </td>
-        <td>{{ b.unblock_at }} </td>
-        <td>{{ b.added|timesince:b.unblock_at }} </td>
-    </tr>
-{% endfor %}
-</tbody>
-
-</table>
+{% include "bhr/_blocklist.html" with blocks=manual_blocks title="Manual Blocks" %}
+{% include "bhr/_blocklist.html" with blocks=auto_blocks title="50 most recent automated blocks" %}
 
 </form>
 

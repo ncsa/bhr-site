@@ -1,0 +1,40 @@
+<h3> {{ title }} </h3>
+{% if blocks %}
+<table class="table table-striped table-bordered">
+
+<thead>
+<tr>
+    <th>Unblock</th>
+    <th>Cidr</th>
+    <th>Who</th>
+    <th>Source</th>
+    <th>Why</th>
+    <th>Added</th>
+    <th>Unblock At</th>
+    <th>Duration</th>
+</tr>
+</thead>
+
+<tbody>
+{% for b in blocks %}
+    <tr>
+        <td>
+            <input type="checkbox" name="block_id" value="{{b.id}}">
+        </td>
+        <td>{{ b.cidr }} </td>
+        <td>{{ b.who__username }} </td>
+        <td>{{ b.source }} </td>
+        <td>{{ b.why }} </td>
+        <td>{{ b.added }} </td>
+        <td>{{ b.unblock_at }} </td>
+        <td>{{ b.added|timesince:b.unblock_at }} </td>
+    </tr>
+{% endfor %}
+</tbody>
+
+</table>
+{% else %}
+    <div class="alert alert-warning">
+    No blocks.
+    </div>
+{% endif %}
