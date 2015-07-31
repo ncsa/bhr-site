@@ -19,7 +19,6 @@ class BlockSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('who', 'url', 'cidr', 'source', 'why', 'added', 'unblock_at', 'skip_whitelist', 'set_blocked')
 
 class BlockBriefSerializer(serializers.ModelSerializer):
-    who = serializers.SlugField(read_only=True)
     class Meta:
         model = Block
         fields = ('cidr', )
@@ -54,13 +53,12 @@ class BlockRequestSerializer(serializers.Serializer):
     autoscale = serializers.BooleanField(default=False)
     extend = serializers.BooleanField(default=True)
 
-    def validate_duration(self, attrs, source):
-        value = attrs[source]
+    def validate_duration(self, value):
         try:
             expand_time(value)
         except ValueError:
             raise serializers.ValidationError("Invalid duration")
-        return attrs
+        return value
 
     def validate(self, attrs):
         if attrs.get('duration') and attrs.get('unblock_at'):
@@ -88,9 +86,9 @@ class UnblockNowSerializer(serializers.Serializer):
     cidr = serializers.CharField(max_length=20)
     why = serializers.CharField()
 
-    def validate_cidr(self, attrs, source):
-        cidr = attrs[source]
+    def validate_cidr(self, value):
+        cidr = value
         b = BHRDB().get_block(cidr)
         if not b:
             raise serializers.ValidationError("%s is not currently blocked" % cidr)
-        return attrs
+        return cidr

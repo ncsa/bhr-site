@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User, Permission
 from django.test import TestCase
 from django.utils import timezone
+import dateutil.parser
 import datetime
 import json
 import csv
@@ -628,14 +629,16 @@ class ApiTest(TestCase):
         self._add_block('1.1.1.1', source='one', duration=60)
         self._add_block('1.1.1.1', source='one', duration=120, extend=False)
         block = self.client.get("/bhr/api/query/1.1.1.1").data[0]
-        duration = (block['unblock_at'] - timezone.now()).seconds
+        unblock_at = dateutil.parser.parse(block["unblock_at"])
+        duration = (unblock_at - timezone.now()).seconds
         self.assertLess(duration, 118)
 
     def test_block_extend_True(self):
         self._add_block('1.1.1.1', source='one', duration=60)
         self._add_block('1.1.1.1', source='one', duration=120, extend=True)
         block = self.client.get("/bhr/api/query/1.1.1.1").data[0]
-        duration = (block['unblock_at'] - timezone.now()).seconds
+        unblock_at = dateutil.parser.parse(block["unblock_at"])
+        duration = (unblock_at - timezone.now()).seconds
         self.assertGreater(duration, 118)
 
     def test_block_extend_True_from_infinite_does_not_replace(self):
