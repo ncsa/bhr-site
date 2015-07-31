@@ -59,7 +59,7 @@ class BlockViewset(viewsets.ModelViewSet):
         block = self.get_object()
         serializer = SetBlockedSerializer(data=request.DATA)
         if serializer.is_valid():
-            ident = serializer.data['ident']
+            ident = serializer.validated_data['ident']
             block.blockentry_set.create(ident=ident)
             return Response({'status': 'ok'})
         else:
@@ -85,7 +85,7 @@ class ExpectedBlockViewset(viewsets.ReadOnlyModelViewSet):
     queryset = Block.objects.none()  # Required for DjangoModelPermissions
     def get_queryset(self):
         queryset = Block.expected.all().select_related('who')
-        source = self.request.QUERY_PARAMS.get('source', None)
+        source = self.request.query_params.get('source', None)
         if source:
             queryset = queryset.filter(source=source)
         return queryset
@@ -122,7 +122,7 @@ class BlockQueue(generics.ListAPIView):
 
     def get_queryset(self):
         ident = self.kwargs['ident']
-        timeout = int(self.request.QUERY_PARAMS.get('timeout', 0))
+        timeout = int(self.request.query_params.get('timeout', 0))
         if not timeout:
             return BHRDB().block_queue(ident, limit=200)
 
@@ -152,7 +152,7 @@ class block(APIView):
         context = {"request": request}
         serializer = BlockRequestSerializer(data=request.DATA)
         if serializer.is_valid():
-            b = BHRDB().add_block(who=request.user, **serializer.data)
+            b = BHRDB().add_block(who=request.user, **serializer.validated_data)
             return Response(BlockSerializer(b, context=context).data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -163,7 +163,7 @@ class unblock_now(APIView):
     def post(self, request):
         serializer = UnblockNowSerializer(data=request.DATA)
         if serializer.is_valid():
-            d = serializer.data
+            d = serializer.validated_data
             BHRDB().unblock_now(d['cidr'], request.user, d['why'])
             return Response({'status': 'ok'})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -178,7 +178,7 @@ class mblock(APIView):
         if serializer.is_valid():
             #FIXME: move this into BHRDB directly
             with transaction.atomic():
-                for block in serializer.data:
+                for block in serializer.validated_data:
                     b = BHRDB().add_block(who=request.user, **block)
                     created.append(b)
             return Response(BlockSerializer(created, many=True, context=context).data, status=status.HTTP_201_CREATED)
