@@ -11,3 +11,4 @@ wsgiref==0.1.2
 psycopg2==2.5.4
 pytz==2014.7
 python-dateutil==2.4.2
+django-forms-bootstrap==3.0.1
