@@ -349,8 +349,11 @@ class BHRDB(object):
                 entry.save()
                 logger.info("SET_UNBLOCKED ID=%s IP=%s IDENT=%s", entry.block.id, entry.block.cidr, entry.ident)
 
-    def get_history(self, cidr):
-        return Block.objects.filter(cidr__in_cidr=cidr).select_related('who').order_by('-added')
+    def get_history(self, query):
+        if query[0].isdigit(): #assume cidr block
+            return Block.objects.filter(cidr__in_cidr=query).select_related('who').order_by('-added')
+        else:
+            return Block.objects.filter(why__contains=query).select_related('who').order_by('-added')
 
     def stats(self):
         ret = {}

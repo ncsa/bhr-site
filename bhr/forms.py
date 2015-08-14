@@ -52,7 +52,7 @@ class AddBlockForm(forms.Form):
         return cleaned_data
 
 class QueryBlockForm(forms.Form):
-    cidr = CidrAddressFormField()
+    query = forms.CharField(max_length=50, label="CIDR or comment string")
 
 class UnblockForm(forms.Form):
     block_ids = forms.CharField(max_length=1000, widget=forms.HiddenInput())

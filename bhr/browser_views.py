@@ -38,7 +38,7 @@ class QueryView(View):
         if not form.is_valid():
             return render(self.request, "bhr/query.html", {"form": form})
 
-        query = form.cleaned_data['cidr']
+        query = form.cleaned_data['query']
         blocks = BHRDB().get_history(query).prefetch_related("blockentry_set")
         return render(self.request, "bhr/query_result.html", {"query": query, "form": form, "blocks": blocks})
 
