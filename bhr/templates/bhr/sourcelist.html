@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2> 500 most recent blocks from source {{ source }} </h2>
+
+<form action="{% url 'unblock' %}" method="POST">{% csrf_token %}
+    <input type="submit" value="Unblock Selected" />
+    <input type="hidden" name="query" value="{{query}}" />
+
+{% include "bhr/_blocklist.html" with blocks=blocks title="Blocks" %}
+
+</form>
+
+{% endblock %}

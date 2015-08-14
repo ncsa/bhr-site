@@ -88,3 +88,13 @@ class ListView(TemplateView):
             'manual_blocks': query_to_blocklist(manual_blocks),
             'auto_blocks': query_to_blocklist(auto_blocks),
         }
+
+class SourceListView(TemplateView):
+    template_name = "bhr/sourcelist.html"
+    def get_context_data(self, source, *args):
+        all_blocks = BHRDB().expected()
+        blocks = all_blocks.filter(source=source).order_by("-added")[:500]
+        return {
+            'source': source,
+            'blocks': query_to_blocklist(blocks),
+        }

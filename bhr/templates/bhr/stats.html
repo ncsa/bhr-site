@@ -14,8 +14,14 @@
 
 <h2> Source Stats </h2>
 
+<table class="table table-striped table-bordered" style="width: auto">
+<tr><th> Source </th> <th> Count </th> </tr>
 {% for source, count in source_stats.items %}
-    <h3> {{ source }} {{ count }} </h3>
+    <tr>
+        <td> <a href="{% url 'source-list' source %}">{{ source }}</a></td>
+        <td> {{ count }} </td>
+    </tr>
 {% endfor %}
+</table>
 
 {% endblock %}
