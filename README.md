@@ -36,6 +36,8 @@ Create `bhr_site/settings_local.py` with something like:
 
     DEBUG = False
     ALLOWED_HOSTS = ['bhr.example.com', 'bhr']
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
 
     STATIC_ROOT="/home/bhr/static"
 
