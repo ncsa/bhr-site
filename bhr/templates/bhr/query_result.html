@@ -1,8 +1,9 @@
 {% extends "base.html" %}
+{% load bootstrap_tags %}
 {% block content %}
 
 <form action="" method="GET">
-    {{ form.as_p }}
+    {{ form | as_bootstrap }}
     <input type="submit" value="Query" />
 </form>
 
