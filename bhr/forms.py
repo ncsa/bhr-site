@@ -35,8 +35,10 @@ DURATION_CHOICES = (
     (0,             'Indefinite'),
 )
 
+AUTOFOCUS = {'autofocus': True}
+
 class AddBlockForm(forms.Form):
-    cidr = CidrAddressFormField()
+    cidr = CidrAddressFormField(widget=forms.TextInput(attrs=AUTOFOCUS))
     why = forms.CharField(widget=forms.Textarea)
     duration = forms.ChoiceField(choices=DURATION_CHOICES)
     skip_whitelist = forms.BooleanField(required=False)
@@ -52,15 +54,15 @@ class AddBlockForm(forms.Form):
         return cleaned_data
 
 class QueryBlockForm(forms.Form):
-    query = forms.CharField(max_length=50, label="CIDR or comment string")
+    query = forms.CharField(max_length=50, label="CIDR or comment string", widget=forms.TextInput(attrs=AUTOFOCUS))
 
 class UnblockForm(forms.Form):
     block_ids = forms.CharField(max_length=1000, widget=forms.HiddenInput())
     query = forms.CharField(max_length=30, widget=forms.HiddenInput())
-    why = forms.CharField(widget=forms.Textarea)
+    why = forms.CharField(widget=forms.Textarea(attrs=AUTOFOCUS))
 
 class AddSourceBlacklistForm(ModelForm):
     source = forms.CharField()
-    why = forms.CharField(widget=forms.Textarea)
+    why = forms.CharField(widget=forms.Textarea(attrs=AUTOFOCUS))
     class Meta:
         exclude = ('who',)
