@@ -9,12 +9,6 @@
 
 <br />
 
-<form action="{% url 'unblock' %}" method="POST">{% csrf_token %}
-    <div class="form-group">
-        <input type="submit" value="Unblock Selected" class="btn btn-danger" />
-        <input type="hidden" name="query" value="{{query}}" />
-    </div>
-
 <table class="table table-striped table-bordered">
 
 <thead>
