@@ -8,7 +8,7 @@
 </ul>
 
 <form action="{% url 'unblock' %}" method="POST">{% csrf_token %}
-    <input type="submit" value="Unblock Selected" />
+    <input type="submit" value="Unblock Selected" class="btn btn-danger" />
     <input type="hidden" name="query" value="{{query}}" />
 
 {% include "bhr/_blocklist.html" with blocks=manual_blocks title="Manual Blocks" %}
