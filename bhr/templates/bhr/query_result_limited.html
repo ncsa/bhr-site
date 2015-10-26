@@ -19,11 +19,8 @@
 
 <thead>
 <tr>
-    <th>Unblock</th>
     <th>Cidr</th>
-    <th>Who</th>
     <th>Source</th>
-    <th>Why</th>
     <th>Added</th>
     <th>Unblock At</th>
     <th>Duration</th>
@@ -33,26 +30,11 @@
 <tbody>
 {% for b in blocks %}
     <tr>
-        <td>
-            {% if b.is_unblockable %}
-            <input type="checkbox" name="block_id" value="{{b.id}}">
-            {% endif %}
-        </td>
         <td>{{ b.cidr }} </td>
-        <td>{{ b.who }} </td>
         <td>{{ b.source }} </td>
-        <td>{{ b.why }} </td>
         <td>{{ b.added }} </td>
         <td>{{ b.unblock_at }} </td>
         <td>{{ b.added|timesince:b.unblock_at }} </td>
-        <td>
-            <table class="table table-striped table-bordered">
-            <tr><th>Ident</th><th>Added</th><th>Removed</th></tr>
-            {% for e in b.blockentry_set.all %}
-                <tr><td>{{ e.ident }}</td> <td>{{e.added}}</td> <td>{{e.removed}}</td></tr>
-            {% endfor %}
-            </table>
-        </td>
     </tr>
 {% endfor %}
 </tbody>

@@ -29,6 +29,8 @@ class AddView(FormView):
         return redirect(reverse("query") + "?query=" +  block_request["cidr"])
 
 class QueryView(View):
+    result_template_name = 'bhr/query_result.html'
+
     def get(self, request):
         if self.request.GET:
             form = QueryBlockForm(self.request.GET)
@@ -40,7 +42,10 @@ class QueryView(View):
 
         query = form.cleaned_data['query']
         blocks = BHRDB().get_history(query).prefetch_related("blockentry_set")
-        return render(self.request, "bhr/query_result.html", {"query": query, "form": form, "blocks": blocks})
+        return render(self.request, self.result_template_name, {"query": query, "form": form, "blocks": blocks})
+
+class QueryViewLimited(QueryView):
+    result_template_name = 'bhr/query_result_limited.html'
 
 class UnblockView(View):
     def post(self, request):
