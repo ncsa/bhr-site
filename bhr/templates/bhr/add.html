@@ -4,7 +4,7 @@
 {% block content %}
 <form action="" method="post">{% csrf_token %}
     {{ form | as_bootstrap }}
-    <input type="submit" value="Block" />
+    <input type="submit" value="Block" class="btn btn-danger" />
 </form>
 
 {% endblock %}
