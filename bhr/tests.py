@@ -246,6 +246,11 @@ class DBTests(TestCase):
         self.assertEqual(bool(is_whitelisted("141.142.4.0/24")), True)
         self.assertEqual(bool(is_whitelisted("141.0.0.0/8")), True)
 
+    def test_block_then_whitelist_then_unblock_works(self):
+        b1 = self.db.add_block('1.2.3.4', self.user, 'other', 'testing')
+        WhitelistEntry(who=self.user, why='test', cidr='1.2.3.0/24').save()
+        self.db.unblock_now('1.2.3.4', self.user, 'testing')
+
     def test_prefixlen_too_small(self):
         self.assertEqual(bool(is_prefixlen_too_small("1.2.3.4")), False)
         self.assertEqual(bool(is_prefixlen_too_small("1.2.3.4/24")), False)
