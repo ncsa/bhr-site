@@ -452,6 +452,13 @@ class ApiTest(TestCase):
         hist = self.client.get("/bhr/api/query/1.2.3.4").data
         self.assertEqual(len(hist), 1)
 
+    def test_history_limited(self):
+        self._add_block()
+        self.client.logout()
+        hist = self.client.get("/bhr/api/query_limited/1.2.3.4").data
+        self.assertEqual(len(hist), 1)
+        self.assertNotIn('who', hist[0])
+        self.assertNotIn('why', hist[0])
 
     def test_history_multiple(self):
         hist = self.client.get("/bhr/api/query/1.2.3.4").data
