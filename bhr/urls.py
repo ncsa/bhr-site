@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.decorators import login_required, permission_required
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
@@ -16,7 +17,7 @@ router.register(r'pending_blocks', views.PendingBlockViewset, 'pending_blocks')
 router.register(r'current_blocks_brief', views.CurrentBlockBriefViewset, 'current_blocks_brief')
 router.register(r'pending_removal_blocks', views.PendingRemovalBlockViewset, 'pending_removal_blocks')
 
-urlpatterns = patterns('',
+urlpatterns = [
     # Examples:
     # url(r'^$', 'testapp.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
@@ -32,17 +33,22 @@ urlpatterns = patterns('',
     url(r'^api/queue/(?P<ident>.+)', views.BlockQueue.as_view()),
     url(r'^api/unblock_queue/(?P<ident>.+)', views.UnBlockQueue.as_view()),
     url(r'^api/query/(?P<cidr>.+)', views.BlockHistory.as_view()),
-    url(r'^api/query_limited/(?P<cidr>.+)', views.BlockHistoryLimited.as_view()),
 
     url('^$', browser_views.IndexView.as_view(), name="home"),
     url('^add$', permission_required('bhr.add_block')(browser_views.AddView.as_view()), name="add"),
     url('^query$', login_required(browser_views.QueryView.as_view()), name="query"),
-    url('^query_limited$', browser_views.QueryViewLimited.as_view(), name="query_limited"),
     url('^unblock$', permission_required('bhr.change_block')(browser_views.UnblockView.as_view()), name="unblock"),
     url('^do_unblock$', permission_required('bhr.change_block')(browser_views.DoUnblockView.as_view()), name="do_unblock"),
     url(r'^stats$', browser_views.StatsView.as_view(), name="stats"),
     url(r'^list$', login_required(browser_views.ListView.as_view()), name="list"),
     url(r'^list/source/(?P<source>.+)$', login_required(browser_views.SourceListView.as_view()), name="source-list"),
     url(r'^list.csv', views.bhlist.as_view(), name='csv'),
-    url(r'^publist.csv', views.bhlistpub, name='pubcsv'),
-)
+]
+
+if settings.BHR.get('unauthenticated_limited_query', False):
+    urlpatterns.extend([
+        url(r'^publist.csv', views.bhlistpub, name='pubcsv'),
+
+        url(r'^api/query_limited/(?P<cidr>.+)', views.BlockHistoryLimited.as_view()),
+        url('^query_limited$', browser_views.QueryViewLimited.as_view(), name="query_limited"),
+    ])

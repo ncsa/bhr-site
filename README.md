@@ -57,7 +57,12 @@ Create `bhr_site/settings_local.py` with something like:
         'penalty_time_multiplier':      2.0,
         'return_to_base_multiplier':    2.0,
         'return_to_base_factor':        2.0,
+        'unauthenticated_limited_query':  True,
     }
+
+unauthenticated\_limited\_query enables the /bhr/query\_limited,
+/bhr/api/query\_limited, and /bhr/publist.csv endpoints.  These do not require
+authentication but return a subset of the fields.
 
 And configure apache similar to examples/apache.conf
 
