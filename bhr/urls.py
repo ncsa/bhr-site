@@ -32,6 +32,7 @@ urlpatterns = patterns('',
     url(r'^api/queue/(?P<ident>.+)', views.BlockQueue.as_view()),
     url(r'^api/unblock_queue/(?P<ident>.+)', views.UnBlockQueue.as_view()),
     url(r'^api/query/(?P<cidr>.+)', views.BlockHistory.as_view()),
+    url(r'^api/query_limited/(?P<cidr>.+)', views.BlockHistoryLimited.as_view()),
 
     url('^$', browser_views.IndexView.as_view(), name="home"),
     url('^add$', permission_required('bhr.add_block')(browser_views.AddView.as_view()), name="add"),

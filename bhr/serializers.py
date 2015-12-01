@@ -18,6 +18,11 @@ class BlockSerializer(serializers.HyperlinkedModelSerializer):
         model = Block
         fields = ('who', 'url', 'cidr', 'source', 'why', 'added', 'unblock_at', 'skip_whitelist', 'set_blocked')
 
+class BlockLimitedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Block
+        fields = ('cidr', 'source', 'added', 'unblock_at' )
+
 class BlockBriefSerializer(serializers.ModelSerializer):
     class Meta:
         model = Block
