@@ -52,3 +52,7 @@ if settings.BHR.get('unauthenticated_limited_query', False):
         url(r'^api/query_limited/(?P<cidr>.+)', views.BlockHistoryLimited.as_view()),
         url('^query_limited$', browser_views.QueryViewLimited.as_view(), name="query_limited"),
     ])
+else:
+    urlpatterns.extend([
+        url(r'^publist.csv', login_required(views.bhlistpub), name='pubcsv'),
+    ])
