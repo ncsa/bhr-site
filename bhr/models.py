@@ -377,6 +377,12 @@ class BHRDB(object):
         return stats
 
 
+def filter_local_networks(query):
+    q = Q()
+    for n in settings.BHR.get("local_networks", []):
+        q |= Q(cidr__in_cidr=n)
+    return query.filter(q)
+
 class InCidr(models.Lookup):
     lookup_name = "in_cidr"
 

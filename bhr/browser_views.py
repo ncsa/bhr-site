@@ -3,7 +3,7 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 
-from bhr.models import WhitelistEntry, Block, BlockEntry, BHRDB
+from bhr.models import WhitelistEntry, Block, BlockEntry, BHRDB, filter_local_networks
 from bhr.forms import AddBlockForm, QueryBlockForm, UnblockForm
 
 from django.db import transaction
@@ -88,9 +88,11 @@ class ListView(TemplateView):
     def get_context_data(self, *args):
         all_blocks = BHRDB().expected()
         manual_blocks = all_blocks.filter(Q(source="web") | Q(source="cli"))
+        local_blocks = filter_local_networks(all_blocks)
         auto_blocks = all_blocks.filter(~Q(source="web") | Q(source="cli")).order_by("-added")[:50]
         return {
             'manual_blocks': query_to_blocklist(manual_blocks),
+            'local_blocks': query_to_blocklist(local_blocks),
             'auto_blocks': query_to_blocklist(auto_blocks),
         }
 

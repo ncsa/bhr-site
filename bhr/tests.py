@@ -6,7 +6,7 @@ import datetime
 import json
 import csv
 
-from bhr.models import BHRDB, Block, WhitelistEntry, SourceBlacklistEntry, is_whitelisted, is_prefixlen_too_small, is_source_blacklisted
+from bhr.models import BHRDB, Block, WhitelistEntry, SourceBlacklistEntry, is_whitelisted, is_prefixlen_too_small, is_source_blacklisted, filter_local_networks
 from bhr.util import expand_time
 
 # Create your tests here.
@@ -260,6 +260,15 @@ class DBTests(TestCase):
         self.assertEqual(bool(is_source_blacklisted("test")), False)
         SourceBlacklistEntry(who=self.user, why='test', source='test').save()
         self.assertEqual(bool(is_source_blacklisted("test")), True)
+
+    def test_filter_local(self):
+        b1 = self.db.add_block('1.2.3.4', self.user, 'other', 'testing')
+        local = filter_local_networks(self.db.expected())
+        self.assertEqual(len(local), 0)
+
+        b1 = self.db.add_block('10.2.3.4', self.user, 'other', 'testing')
+        local = filter_local_networks(self.db.expected())
+        self.assertEqual(len(local), 1)
 
 class ScalingTests(TestCase):
     def setUp(self):
