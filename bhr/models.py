@@ -183,11 +183,6 @@ class Block(models.Model):
         self.unblock_at = timezone.now()
         self.save()
 
-    @property
-    def dns(self):
-        ip = str(self.cidr.ip)
-        return resolve(ip)
-
 class BlockEntry(models.Model):
     block = models.ForeignKey(Block)
     ident = models.CharField("blocker ident", max_length=50, db_index=True)
