@@ -12,7 +12,7 @@
     <input type="hidden" name="query" value="{{query}}" />
 
 {% include "bhr/_blocklist.html" with blocks=manual_blocks title="Manual Blocks" %}
-{% include "bhr/_blocklist.html" with blocks=local_blocks title="Local Blocks" %}
+{% include "bhr/_blocklist.html" with blocks=local_blocks title="Local Blocks" resolve=True %}
 {% include "bhr/_blocklist.html" with blocks=auto_blocks title="50 most recent automated blocks" %}
 
 </form>

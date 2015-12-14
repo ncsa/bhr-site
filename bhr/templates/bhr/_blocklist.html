@@ -6,6 +6,9 @@
 <tr>
     <th>Unblock</th>
     <th>Cidr</th>
+{% if resolve %}
+    <th>DNS</th>
+{% endif %}
     <th>Who</th>
     <th>Source</th>
     <th>Why</th>
@@ -22,6 +25,9 @@
             <input type="checkbox" name="block_id" value="{{b.id}}">
         </td>
         <td>{{ b.cidr }} </td>
+        {% if resolve %}
+            <td>{{ b.dns }}</td>
+        {% endif %}
         <td>{{ b.who__username }} </td>
         <td>{{ b.source }} </td>
         <td>{{ b.why }} </td>

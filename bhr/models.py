@@ -15,7 +15,7 @@ from django.conf import settings
 from urllib import quote
 import logging
 
-from bhr.util import expand_time
+from bhr.util import expand_time, resolve
 
 logger = logging.getLogger(__name__)
 
@@ -182,6 +182,11 @@ class Block(models.Model):
         self.unblock_why = why
         self.unblock_at = timezone.now()
         self.save()
+
+    @property
+    def dns(self):
+        ip = str(self.cidr.ip)
+        return resolve(ip)
 
 class BlockEntry(models.Model):
     block = models.ForeignKey(Block)

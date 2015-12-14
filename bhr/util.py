@@ -1,6 +1,9 @@
 from django.http import HttpResponse
 import csv
 from cStringIO import StringIO
+
+import socket
+
 def respond_csv(lst, headers):
     f = StringIO()
     writer = csv.writer(f)
@@ -33,3 +36,10 @@ def expand_time(text):
             return int(number_part) * time_suffixes[suff]
 
     raise ValueError("Invalid duration %s" % text)
+
+def resolve(ip):
+    try :
+        return socket.gethostbyaddr(ip)[0]
+    except socket.error:
+        return ''
+
