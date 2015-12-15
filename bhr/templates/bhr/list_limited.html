@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3> CSV Files </h3>
+<ul>
+    <li><a href="{% url 'pubcsv' %}">Public Block list CSV</a></li>
+</ul>
+
+{% include "bhr/_blocklist.html" with blocks=manual_blocks title="Manual Blocks" limited=True %}
+{% include "bhr/_blocklist.html" with blocks=local_blocks title="Local Blocks" limited=True resolve=True %}
+
+</form>
+
+{% endblock %}

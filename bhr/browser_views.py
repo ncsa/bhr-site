@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.views.generic import View, FormView, TemplateView, DetailView
 from django.core.urlresolvers import reverse
 from django.shortcuts import render, redirect
@@ -17,6 +18,12 @@ from django.db import transaction
 
 class IndexView(TemplateView):
     template_name = "bhr/index.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(IndexView, self).get_context_data(**kwargs)
+        context['show_limited'] = settings.BHR.get('unauthenticated_limited_query', False)
+        return context
+
 
 class AddView(FormView):
     template_name = "bhr/add.html"
@@ -95,6 +102,18 @@ class ListView(TemplateView):
             'local_blocks': query_to_blocklist(local_blocks),
             'auto_blocks': query_to_blocklist(auto_blocks),
         }
+
+class ListViewLimited(TemplateView):
+    template_name = "bhr/list_limited.html"
+    def get_context_data(self, *args):
+        all_blocks = BHRDB().expected()
+        manual_blocks = all_blocks.filter(Q(source="web") | Q(source="cli"))
+        local_blocks = filter_local_networks(all_blocks)
+        return {
+            'manual_blocks': query_to_blocklist(manual_blocks),
+            'local_blocks': query_to_blocklist(local_blocks),
+        }
+
 
 class SourceListView(TemplateView):
     template_name = "bhr/sourcelist.html"
