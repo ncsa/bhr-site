@@ -207,7 +207,11 @@ class set_unblocked_multi(APIView):
 
 @api_view(["GET"])
 def stats(request):
-    stats = BHRDB().stats()
+    db = BHRDB()
+
+    stats = db.stats()
+    stats['sources'] = db.source_stats()
+
     return Response(stats)
 
 from bhr.util import respond_csv
