@@ -214,6 +214,13 @@ def stats(request):
 
     return Response(stats)
 
+@api_view(["GET"])
+def source_stats(request):
+    db = BHRDB()
+    stats = db.source_stats()
+
+    return Response(stats)
+
 from bhr.util import respond_csv
 class bhlist(APIView):
     permission_classes = [DjangoModelPermissions]
