@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User, Permission
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
 import dateutil.parser
 import datetime
@@ -269,6 +269,18 @@ class DBTests(TestCase):
         b1 = self.db.add_block('10.2.3.4', self.user, 'other', 'testing')
         local = filter_local_networks(self.db.expected())
         self.assertEqual(len(local), 1)
+
+    @override_settings()
+    def test_filter_local_unset(self):
+        from django.conf import settings
+        del settings.BHR['local_networks']
+        b1 = self.db.add_block('1.2.3.4', self.user, 'other', 'testing')
+        local = filter_local_networks(self.db.expected())
+        self.assertEqual(len(local), 0)
+
+        b1 = self.db.add_block('10.2.3.4', self.user, 'other', 'testing')
+        local = filter_local_networks(self.db.expected())
+        self.assertEqual(len(local), 0)
 
 class ScalingTests(TestCase):
     def setUp(self):

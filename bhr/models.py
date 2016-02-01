@@ -378,8 +378,11 @@ class BHRDB(object):
 
 
 def filter_local_networks(query):
+    local_nets = settings.BHR.get("local_networks", [])
+    if not local_nets:
+        return Block.objects.none()
     q = Q()
-    for n in settings.BHR.get("local_networks", []):
+    for n in local_nets:
         q |= Q(cidr__in_cidr=n)
     return query.filter(q)
 
