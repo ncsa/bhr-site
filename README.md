@@ -58,6 +58,7 @@ Create `bhr_site/settings_local.py` with something like:
         'return_to_base_multiplier':    2.0,
         'return_to_base_factor':        2.0,
         'unauthenticated_limited_query':  True,
+        'local_networks':               ['10.0.0.0/8'],
     }
 
 unauthenticated\_limited\_query enables the /bhr/query\_limited,
