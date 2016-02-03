@@ -49,7 +49,7 @@ class UnBlockEntrySerializer(serializers.HyperlinkedModelSerializer):
         fields = ('id', 'block', 'ident', 'added', 'set_unblocked')
 
 class BlockRequestSerializer(serializers.Serializer):
-    cidr = serializers.CharField(max_length=20)
+    cidr = serializers.CharField(max_length=50)
     source = serializers.CharField(max_length=30)
     why = serializers.CharField()
     duration = serializers.CharField(required=True)
@@ -88,7 +88,7 @@ class SetBlockedSerializer(serializers.Serializer):
     ident = serializers.CharField()
 
 class UnblockNowSerializer(serializers.Serializer):
-    cidr = serializers.CharField(max_length=20)
+    cidr = serializers.CharField(max_length=50)
     why = serializers.CharField()
 
     def validate_cidr(self, value):
