@@ -73,6 +73,6 @@ And configure apache similar to examples/apache.conf
 Related projects
 ================
 
-* [bhr-client](https://github.com/JustinAzoff/bhr-client) - BHR python client
-* [bhr-client-exabgp](https://github.com/JustinAzoff/bhr-client-exabgp) - ExaBGP block manager
-* [bhr-bro](https://github.com/JustinAzoff/bhr-bro) - Basic Bro integration for BHR
+* [bhr-client](https://github.com/ncsa/bhr-client) - BHR python client
+* [bhr-client-exabgp](https://github.com/ncsa/bhr-client-exabgp) - ExaBGP block manager
+* [bhr-bro](https://github.com/ncsa/bhr-bro) - Basic Bro integration for BHR
