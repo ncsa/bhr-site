@@ -61,9 +61,12 @@ Create `bhr_site/settings_local.py` with something like:
         'local_networks':               ['10.0.0.0/8'],
     }
 
-unauthenticated\_limited\_query enables the /bhr/query\_limited,
-/bhr/api/query\_limited, and /bhr/publist.csv endpoints.  These do not require
-authentication but return a subset of the fields.
+unauthenticated\_limited\_query enables:
+    * the /bhr/limited/query and /bhr/limited/list pages
+    * the /bhr/api/query\_limited api endpoint
+    * the /bhr/publist.csv feed.
+
+These do not require authentication but return a subset of the fields.
 
 And configure apache similar to examples/apache.conf
 
