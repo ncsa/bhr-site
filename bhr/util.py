@@ -4,11 +4,16 @@ from cStringIO import StringIO
 
 import socket
 
+def clean_ascii_row(row):
+    return [c.encode('ascii','replace') if isinstance(c, basestring) else c for c in row]
+
 def respond_csv(lst, headers):
     f = StringIO()
     writer = csv.writer(f)
     writer.writerow(headers)
-    writer.writerows(lst)
+
+    for row in lst:
+        writer.writerow(clean_ascii_row(row))
 
     return HttpResponse(f.getvalue(), content_type="text/csv")
 

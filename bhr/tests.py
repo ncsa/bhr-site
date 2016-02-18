@@ -342,11 +342,11 @@ class ApiTest(TestCase):
         for perm in 'add_block change_block add_blockentry change_blockentry'.split():
             self.user.user_permissions.add(Permission.objects.get(codename=perm))
 
-    def _add_block(self, cidr='1.2.3.4', duration=30, skip_whitelist=0,source='test', extend=False):
+    def _add_block(self, cidr='1.2.3.4', duration=30, skip_whitelist=0,source='test', extend=False, why='testing'):
         return self.client.post('/bhr/api/block', dict(
             cidr=cidr,
             source=source,
-            why='testing',
+            why=why,
             duration=duration,
             skip_whitelist=skip_whitelist,
             extend=extend,
@@ -576,6 +576,14 @@ class ApiTest(TestCase):
         self.assertEqual(data[0]['who'], "admin")
         self.assertEqual(data[0]['why'], "testing")
         self.assertEqual(data[0]['source'], "test")
+
+    def test_list_csv_unicode_crap(self):
+        unicode_crap = u'\u0153\u2211\xb4\xae\u2020\xa5\xa8\u02c6\xf8\u03c0\u201c\u2018'
+        self._add_block(why=unicode_crap)
+        csv_txt = self.client.get("/bhr/list.csv").content
+
+        data = list(csv.DictReader(csv_txt.splitlines()))
+        self.assertEqual(len(data), 1)
 
     def test_set_blocked_multi(self):
         self._add_block('1.2.3.4')

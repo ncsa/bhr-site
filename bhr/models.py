@@ -288,7 +288,8 @@ class BHRDB(object):
                 e.set_unblocked()
                 e.save()
 
-        logger.info('BLOCK IP=%s WHO=%s SOURCE=%s WHY=%s UNTIL="%s" DURATION=%s', cidr, who, source, quote(why), unblock_at, duration)
+        quoted_why = quote(why.encode('ascii', 'ignore'))
+        logger.info('BLOCK IP=%s WHO=%s SOURCE=%s WHY=%s UNTIL="%s" DURATION=%s', cidr, who, source, quoted_why, unblock_at, duration)
         return b
 
     def unblock_now(self, cidr, who, why):
