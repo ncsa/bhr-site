@@ -8,9 +8,10 @@ services:
   - postgresql
 
 install:
-  - install: "pip install -r requirements.txt"
+  - pip install -r requirements.txt
 
 before_script:
   - psql -c 'create database bhr;' -U postgres
 
-script: python manage.py test -v 2
+script:
+  - python manage.py test -v 2
