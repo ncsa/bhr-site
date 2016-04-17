@@ -1,6 +1,8 @@
 BHR Site
 ========
 
+[![Build Status](https://travis-ci.org/ncsa/bhr-site.svg?branch=master)](https://travis-ci.org/ncsa/bhr-site)
+
 This is the BHR site / API endpoint.
 
 It does not make any policy decisions except for the block duration auto scaling.
