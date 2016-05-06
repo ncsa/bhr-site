@@ -41,6 +41,9 @@ Create `bhr_site/settings_local.py` with something like:
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
 
+    # openssl rand -base64 48
+    SECRET_KEY = 'output of the openssl command above'
+
     STATIC_ROOT="/home/bhr/static"
 
     ADMINS = (("You", "root@localhost"), )
@@ -62,6 +65,8 @@ Create `bhr_site/settings_local.py` with something like:
         'unauthenticated_limited_query':  True,
         'local_networks':               ['10.0.0.0/8'],
     }
+
+Be sure to genrate a site specific random SECRET\_KEY
 
 The unauthenticated\_limited\_query setting enables:
 
