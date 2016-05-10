@@ -1,5 +1,5 @@
 Django==1.9.6
-django-netfields
+django-netfields==0.5.3
 djangorestframework==3.3.3
 djangorestframework-csv==1.4.1
 psycopg2==2.6.1
