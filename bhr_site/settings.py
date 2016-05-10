@@ -147,6 +147,9 @@ if os.getenv("DATABASE_URL"):
     db_from_env = dj_database_url.config(conn_max_age=500)
     DATABASES['default'].update(db_from_env)
 
+if os.getenv("ON_HEROKU"):
+    DEBUG = False
+
 try:
     LOCAL_SETTINGS
 except NameError:
