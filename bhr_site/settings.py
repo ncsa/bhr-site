@@ -50,6 +50,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 )
 
 REST_FRAMEWORK = {
@@ -139,6 +140,12 @@ BHR = {
 
     'local_networks': ['10.0.0.0/8'],
 }
+
+import dj_database_url
+# Update database configuration with $DATABASE_URL.
+if os.getenv("DATABASE_URL"):
+    db_from_env = dj_database_url.config(conn_max_age=500)
+    DATABASES['default'].update(db_from_env)
 
 try:
     LOCAL_SETTINGS

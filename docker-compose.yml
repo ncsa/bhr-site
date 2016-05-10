@@ -4,6 +4,8 @@ db:
     POSTGRES_DB: bhr
 
 web:
+  environment:
+    DATABASE_URL: postgres://postgres@db/bhr
   build: .
   command: python manage.py runserver 0.0.0.0:8000
   volumes:

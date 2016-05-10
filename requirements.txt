@@ -5,3 +5,5 @@ djangorestframework-csv==1.4.1
 psycopg2==2.6.1
 django-forms-bootstrap==3.0.1
 python-dateutil==2.4.2
+dj-database-url==0.4.1
+whitenoise==3.0
