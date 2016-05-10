@@ -132,8 +132,8 @@ class BlockQueue(generics.ListAPIView):
 
         end = time.time() + timeout
         while time.time() < end:
-            blocks = list(BHRDB().block_queue(ident, limit=200))
-            if blocks:
+            blocks = BHRDB().block_queue(ident, limit=200)
+            if list(blocks):
                 return blocks
             time.sleep(1.0)
         return blocks
