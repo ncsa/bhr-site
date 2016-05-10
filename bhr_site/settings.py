@@ -149,6 +149,8 @@ if os.getenv("DATABASE_URL"):
 
 if os.getenv("ON_HEROKU"):
     DEBUG = False
+    ALLOWED_HOSTS = ['*']
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 try:
     LOCAL_SETTINGS
