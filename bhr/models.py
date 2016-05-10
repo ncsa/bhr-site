@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.db import transaction, connection
 
 from netfields import CidrAddressField
-from netaddr import IPNetwork
+import ipaddress
 
 from django.utils import timezone
 import datetime
@@ -29,15 +29,17 @@ class SourceBlacklistedError(Exception):
     pass
 
 def is_whitelisted(cidr):
-    cidr = IPNetwork(cidr)
+    cidr = ipaddress.ip_network(unicode(cidr))
     for item in WhitelistEntry.objects.all():
-        if cidr in item.cidr or item.cidr in cidr:
+        if cidr[0] in item.cidr or cidr[-1] in item.cidr:
+            return item
+        if item.cidr[0] in cidr or item.cidr[-1] in cidr:
             return item
     return False
 
 def is_prefixlen_too_small(cidr):
     minimum_prefixlen = settings.BHR.get('minimum_prefixlen', 24)
-    cidr = IPNetwork(cidr)
+    cidr = ipaddress.ip_network(cidr)
     return cidr.prefixlen < minimum_prefixlen
 
 def is_source_blacklisted(source):
@@ -315,7 +317,7 @@ class BHRDB(object):
         b.save()
 
     def block_queue(self, ident, limit=200):
-        return list(Block.objects.raw("""
+        return Block.objects.raw("""
             SELECT b.id as pk, * from bhr_block b
             LEFT JOIN bhr_blockentry be
             ON b.id=be.block_id AND be.ident = %s AND be.removed IS NULL
@@ -329,7 +331,7 @@ class BHRDB(object):
             LIMIT %s """,
 
             [ident, timezone.now(), limit]
-        ))
+        )
 
     def unblock_queue(self, ident):
         return BlockEntry.objects.filter(removed__isnull=True, ident=ident).filter(

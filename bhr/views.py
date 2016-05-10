@@ -57,7 +57,7 @@ class BlockViewset(viewsets.ModelViewSet):
     @detail_route(methods=['post'])
     def set_blocked(self, request, pk=None):
         block = self.get_object()
-        serializer = SetBlockedSerializer(data=request.DATA)
+        serializer = SetBlockedSerializer(data=request.data)
         if serializer.is_valid():
             ident = serializer.validated_data['ident']
             block.blockentry_set.create(ident=ident)
@@ -154,7 +154,7 @@ class block(APIView):
     queryset = Block.objects.none()  # Required for DjangoModelPermissions
     def post(self, request):
         context = {"request": request}
-        serializer = BlockRequestSerializer(data=request.DATA)
+        serializer = BlockRequestSerializer(data=request.data)
         if serializer.is_valid():
             b = BHRDB().add_block(who=request.user, **serializer.validated_data)
             return Response(BlockSerializer(b, context=context).data, status=status.HTTP_201_CREATED)
@@ -165,7 +165,7 @@ class unblock_now(APIView):
     permission_classes = [DjangoModelPermissions]
     queryset = Block.objects.none()  # Required for DjangoModelPermissions
     def post(self, request):
-        serializer = UnblockNowSerializer(data=request.DATA)
+        serializer = UnblockNowSerializer(data=request.data)
         if serializer.is_valid():
             d = serializer.validated_data
             BHRDB().unblock_now(d['cidr'], request.user, d['why'])
@@ -177,7 +177,7 @@ class mblock(APIView):
     queryset = Block.objects.none()  # Required for DjangoModelPermissions
     def post(self, request):
         context = {"request": request}
-        serializer = BlockRequestSerializer(data=request.DATA, many=True)
+        serializer = BlockRequestSerializer(data=request.data, many=True)
         created = []
         if serializer.is_valid():
             #FIXME: move this into BHRDB directly
@@ -193,7 +193,7 @@ class set_blocked_multi(APIView):
     permission_classes = [DjangoModelPermissions]
     queryset = BlockEntry.objects.none()  # Required for DjangoModelPermissions
     def post(self, request, ident):
-        ids = request.DATA['ids']
+        ids = request.data['ids']
         BHRDB().set_blocked_multi(ident, ids)
         return Response({'status': 'ok'})
 
@@ -201,7 +201,7 @@ class set_unblocked_multi(APIView):
     permission_classes = [DjangoModelPermissions]
     queryset = BlockEntry.objects.none()  # Required for DjangoModelPermissions
     def post(self, request):
-        ids = request.DATA['ids']
+        ids = request.data['ids']
         BHRDB().set_unblocked_multi(ids)
         return Response({'status': 'ok'})
 

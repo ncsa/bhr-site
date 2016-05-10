@@ -21,7 +21,7 @@ class DBTests(TestCase):
         self.assertEqual(b, None)
 
     def test_adding_a_block_works(self):
-        b = self.db.add_block('1.2.3.4', self.user, 'test', 'testing')
+        b = self.db.add_block('1.2.3.4/32', self.user, 'test', 'testing')
         self.assertEqual(str(b.cidr), '1.2.3.4/32')
 
     def test_adding_a_block_twice_gets_the_same_block(self):
@@ -73,20 +73,20 @@ class DBTests(TestCase):
         self.assertEqual(len(expected), 1)
 
     def test_block_queue_empty(self):
-        q = self.db.block_queue('bgp1')
+        q = list(self.db.block_queue('bgp1'))
         self.assertEqual(len(q), 0)
 
     def test_block_queue(self):
         b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing')
 
-        q = self.db.block_queue('bgp1')
+        q = list(self.db.block_queue('bgp1'))
 
         self.assertEqual(len(q), 1)
         self.assertEqual(str(q[0].cidr), '1.2.3.4/32')
 
         self.db.set_blocked(b1, 'bgp1')
 
-        q = self.db.block_queue('bgp1')
+        q = list(self.db.block_queue('bgp1'))
 
         self.assertEqual(len(q), 0)
 
@@ -94,7 +94,7 @@ class DBTests(TestCase):
         b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing')
 
         for ident in 'bgp1', 'bgp2':
-            q = self.db.block_queue(ident)
+            q = list(self.db.block_queue(ident))
             self.assertEqual(len(q), 1)
             self.assertEqual(str(q[0].cidr), '1.2.3.4/32')
 
@@ -102,7 +102,7 @@ class DBTests(TestCase):
         self.db.set_blocked(b1, 'bgp2')
 
         for ident in 'bgp1', 'bgp2':
-            q = self.db.block_queue(ident)
+            q = list(self.db.block_queue(ident))
             self.assertEqual(len(q), 0)
 
     def test_block_two_blockers_only_one(self):
@@ -110,10 +110,10 @@ class DBTests(TestCase):
 
         self.db.set_blocked(b1, 'bgp1')
 
-        q = self.db.block_queue('bgp1')
+        q = list(self.db.block_queue('bgp1'))
         self.assertEqual(len(q), 0)
 
-        q = self.db.block_queue('bgp2')
+        q = list(self.db.block_queue('bgp2'))
         self.assertEqual(len(q), 1)
 
     def test_block_two_blockers_doesnt_double_current(self):
@@ -252,9 +252,9 @@ class DBTests(TestCase):
         self.db.unblock_now('1.2.3.4', self.user, 'testing')
 
     def test_prefixlen_too_small(self):
-        self.assertEqual(bool(is_prefixlen_too_small("1.2.3.4")), False)
-        self.assertEqual(bool(is_prefixlen_too_small("1.2.3.4/24")), False)
-        self.assertEqual(bool(is_prefixlen_too_small("1.2.3.4/20")), True)
+        self.assertEqual(bool(is_prefixlen_too_small(u"1.2.3.4")), False)
+        self.assertEqual(bool(is_prefixlen_too_small(u"1.2.3.0/24")), False)
+        self.assertEqual(bool(is_prefixlen_too_small(u"1.2.0.0/20")), True)
 
     def test_source_blacklisted(self):
         self.assertEqual(bool(is_source_blacklisted("test")), False)
