@@ -50,3 +50,5 @@ class SourceBlacklistAdmin(AutoWho):
 admin.site.register(SourceBlacklistEntry, SourceBlacklistAdmin)
 admin.site.register(WhitelistEntry, WhitelistAdmin)
 admin.site.register(Block, BlockAdmin)
+
+admin.site.site_header = 'BHR Administration'
