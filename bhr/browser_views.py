@@ -76,7 +76,11 @@ class DoUnblockView(FormView):
         blocks = Block.objects.filter(id__in=block_ids).all()
         for b in blocks:
             b.unblock_now(self.request.user, why)
-        return redirect(reverse("query") + "?query=" + query)
+
+        if query:
+            return redirect(reverse("query") + "?query=" + query)
+        else:
+            return redirect(reverse("list"))
 
 class StatsView(TemplateView):
     template_name = "bhr/stats.html"
@@ -101,6 +105,7 @@ class ListView(TemplateView):
             'manual_blocks': query_to_blocklist(manual_blocks),
             'local_blocks': query_to_blocklist(local_blocks),
             'auto_blocks': query_to_blocklist(auto_blocks),
+            'query': 'list',
         }
 
 class ListViewLimited(TemplateView):

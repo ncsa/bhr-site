@@ -58,7 +58,7 @@ class QueryBlockForm(forms.Form):
 
 class UnblockForm(forms.Form):
     block_ids = forms.CharField(max_length=1000, widget=forms.HiddenInput())
-    query = forms.CharField(max_length=30, widget=forms.HiddenInput())
+    query = forms.CharField(max_length=30, widget=forms.HiddenInput(), required=False)
     why = forms.CharField(widget=forms.Textarea(attrs=AUTOFOCUS))
 
 class AddSourceBlacklistForm(ModelForm):
