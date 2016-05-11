@@ -21,7 +21,6 @@ function install() {
 }
 
 function migrate() {
-    ssh -t $REMOTE 'cd bhr_project; ~/bhr_env/bin/python manage.py syncdb'
     ssh -t $REMOTE 'cd bhr_project; ~/bhr_env/bin/python manage.py migrate'
     ssh -t $REMOTE 'cd bhr_project; ~/bhr_env/bin/python manage.py collectstatic --noinput'
 }
