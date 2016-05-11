@@ -11,9 +11,9 @@
     <li><a href="{% url 'list' %}">Block list</a></li>
 </ul>
 
+{% if show_limited %}
 <h2>Limited access Pages</h2>
 
-{% if show_limited %}
 <ul>
     <li><a href="{% url 'query_limited' %}">Query</a></li>
     <li><a href="{% url 'list_limited' %}">Block list</a></li>
