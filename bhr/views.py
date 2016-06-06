@@ -108,8 +108,6 @@ class PendingRemovalBlockViewset(viewsets.ReadOnlyModelViewSet):
 from rest_framework.views import APIView
 class BlockHistory(generics.ListAPIView):
     serializer_class = BlockSerializer
-    permission_classes = [DjangoModelPermissions]
-    queryset = Block.objects.none()  # Required for DjangoModelPermissions
 
     def get_queryset(self):
         cidr = self.kwargs['cidr']
@@ -121,8 +119,6 @@ class BlockHistoryLimited(BlockHistory):
 
 class BlockQueue(generics.ListAPIView):
     serializer_class = BlockQueueSerializer
-    permission_classes = [DjangoModelPermissions]
-    queryset = Block.objects.none()  # Required for DjangoModelPermissions
 
     def get_queryset(self):
         ident = self.kwargs['ident']
@@ -140,8 +136,6 @@ class BlockQueue(generics.ListAPIView):
 
 class UnBlockQueue(generics.ListAPIView):
     serializer_class = UnBlockEntrySerializer
-    permission_classes = [DjangoModelPermissions]
-    queryset = Block.objects.none()  # Required for DjangoModelPermissions
 
     def get_queryset(self):
         ident = self.kwargs['ident']
@@ -150,8 +144,6 @@ class UnBlockQueue(generics.ListAPIView):
 from rest_framework.response import Response
 
 class block(APIView):
-    permission_classes = [DjangoModelPermissions]
-    queryset = Block.objects.none()  # Required for DjangoModelPermissions
     def post(self, request):
         context = {"request": request}
         serializer = BlockRequestSerializer(data=request.data)
@@ -162,8 +154,6 @@ class block(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class unblock_now(APIView):
-    permission_classes = [DjangoModelPermissions]
-    queryset = Block.objects.none()  # Required for DjangoModelPermissions
     def post(self, request):
         serializer = UnblockNowSerializer(data=request.data)
         if serializer.is_valid():
@@ -173,8 +163,6 @@ class unblock_now(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class mblock(APIView):
-    permission_classes = [DjangoModelPermissions]
-    queryset = Block.objects.none()  # Required for DjangoModelPermissions
     def post(self, request):
         context = {"request": request}
         serializer = BlockRequestSerializer(data=request.data, many=True)
@@ -190,16 +178,12 @@ class mblock(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class set_blocked_multi(APIView):
-    permission_classes = [DjangoModelPermissions]
-    queryset = BlockEntry.objects.none()  # Required for DjangoModelPermissions
     def post(self, request, ident):
         ids = request.data['ids']
         BHRDB().set_blocked_multi(ident, ids)
         return Response({'status': 'ok'})
 
 class set_unblocked_multi(APIView):
-    permission_classes = [DjangoModelPermissions]
-    queryset = BlockEntry.objects.none()  # Required for DjangoModelPermissions
     def post(self, request):
         ids = request.data['ids']
         BHRDB().set_unblocked_multi(ids)
