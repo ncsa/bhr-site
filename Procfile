@@ -1,1 +1,1 @@
-web: gunicorn bhr_site.wsgi --workers=2 --timeout=45 --max-requests=500 --log-file -
+web: gunicorn bhr_site.wsgi --workers=8 --timeout=45 --max-requests=500 --log-file -
