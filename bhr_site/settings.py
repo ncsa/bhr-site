@@ -130,6 +130,9 @@ LOGGING = {
     }
 }
 
+# Where to go after authenticating if, next isn't specified
+LOGIN_REDIRECT_URL = '/'
+
 BHR = {
     'time_multiplier':              2.0,
     'time_window_factor':           2.0,

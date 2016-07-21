@@ -35,14 +35,17 @@ urlpatterns = [
     url(r'^api/query/(?P<cidr>.+)', views.BlockHistory.as_view()),
 
     url('^$', browser_views.IndexView.as_view(), name="home"),
-    url('^add$', permission_required('bhr.add_block')(browser_views.AddView.as_view()), name="add"),
+    url('^add$', permission_required('bhr.add_block', raise_exception=True)(browser_views.AddView.as_view()), name="add"),
     url('^query$', login_required(browser_views.QueryView.as_view()), name="query"),
-    url('^unblock$', permission_required('bhr.change_block')(browser_views.UnblockView.as_view()), name="unblock"),
-    url('^do_unblock$', permission_required('bhr.change_block')(browser_views.DoUnblockView.as_view()), name="do_unblock"),
+    url('^unblock$', permission_required('bhr.change_block', raise_exception=True)(browser_views.UnblockView.as_view()), name="unblock"),
+    url('^do_unblock$', permission_required('bhr.change_block', raise_exception=True)(browser_views.DoUnblockView.as_view()), name="do_unblock"),
     url(r'^stats$', browser_views.StatsView.as_view(), name="stats"),
     url(r'^list$', login_required(browser_views.ListView.as_view()), name="list"),
     url(r'^list/source/(?P<source>.+)$', login_required(browser_views.SourceListView.as_view()), name="source-list"),
     url(r'^list.csv', views.bhlist.as_view(), name='csv'),
+
+    # auth mechanism agnostic login
+    url(r'^login$', browser_views.login, name='login'),
 ]
 
 if settings.BHR.get('unauthenticated_limited_query', False):

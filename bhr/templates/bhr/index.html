@@ -5,7 +5,9 @@
 <h2>Pages</h2>
 
 <ul>
+    {% if perms.bhr.add_block %}
     <li><a href="{% url 'add' %}">Add Block</a></li>
+    {% endif %}
     <li><a href="{% url 'query' %}">Query</a></li>
     <li><a href="{% url 'stats' %}">Stats</a></li>
     <li><a href="{% url 'list' %}">Block list</a></li>
