@@ -129,3 +129,12 @@ class SourceListView(TemplateView):
             'source': source,
             'blocks': query_to_blocklist(blocks),
         }
+
+def login(request):
+    '''Provides a authentication method agnostic login view.
+
+    This gives us something to point to in the templates without requiring us
+    to know exactly which authentication method is being used.
+    '''
+
+    return redirect(settings.LOGIN_URL)

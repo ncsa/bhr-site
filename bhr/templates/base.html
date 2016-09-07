@@ -43,16 +43,24 @@
           <ul class="nav navbar-nav">
             <li class="active"><a href="{% url 'home' %}">Home</a></li>
 
+            {% if perms.bhr.add_block %}
             <li><a href="{% url 'add' %}">Add Block</a></li>
+            {% endif %}
             <li><a href="{% url 'query' %}">Query</a></li>
             <li><a href="{% url 'stats' %}">Stats</a></li>
             <li><a href="{% url 'list' %}">Block list</a></li>
           </ul>
-          {% if user.is_authenticated %}
           <ul class="nav navbar-nav navbar-right">
-            <li> <a href="{% url "django.contrib.auth.views.logout" %}">Log Out</a> </li>
-          </ul>
+          {% if user.is_authenticated %}
+            <li>
+              <div class="navbar-text">
+                <span class="glyphicon glyphicon-user" aria-hidden="true" ></span> {{ user.username }}
+              </div>
+            <li><a href="{% url "django.contrib.auth.views.logout" %}?next={% url 'home' %}">Log Out</a></li>
+          {% else %}
+            <li><a href="{% url 'login' %}">Login</a></li>
           {% endif %}
+          </ul>
         </div><!--/.nav-collapse -->
       </div>
     </div>
