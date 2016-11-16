@@ -78,6 +78,14 @@ These do not require authentication but return a subset of the fields.
 
 And configure apache similar to examples/apache.conf
 
+Development
+===========
+
+    $ docker-compose start db
+    $ # wait a few seconds for db to start
+    $ docker-compose run --rm web python manage.py migrate
+    $ docker-compose up
+
 Related projects
 ================
 
