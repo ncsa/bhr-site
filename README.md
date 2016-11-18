@@ -83,6 +83,7 @@ Development
 
     $ docker-compose run --rm web python manage.py migrate
     $ docker-compose run --rm web python manage.py createsuperuser
+    $ docker-compose run --rm web python manage.py creategroups
     $ docker-compose up
 
 Related projects
