@@ -66,7 +66,7 @@ Create `bhr_site/settings_local.py` with something like:
         'local_networks':               ['10.0.0.0/8'],
     }
 
-Be sure to genrate a site specific random SECRET\_KEY
+Be sure to generate a site specific random SECRET\_KEY
 
 The unauthenticated\_limited\_query setting enables:
 
