@@ -121,13 +121,13 @@ class Block(models.Model):
     why  = models.TextField()
 
     added = models.DateTimeField('date added', auto_now_add=True)
-    unblock_at = models.DateTimeField('date to be unblocked', null=True, db_index=True)
+    unblock_at = models.DateTimeField('date to be unblocked', null=True)
 
     flag = models.CharField(max_length=1, choices=FLAG_DIRECTIONS, default=FLAG_NONE)
 
     skip_whitelist = models.BooleanField(default=False)
 
-    forced_unblock  = models.BooleanField(default=False, db_index=True)
+    forced_unblock  = models.BooleanField(default=False)
     unblock_why = models.TextField(blank=True)
     unblock_who = models.ForeignKey(User, related_name='+', null=True, blank=True)
 
