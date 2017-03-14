@@ -322,7 +322,7 @@ class BHRDB(object):
             LEFT JOIN bhr_blockentry be
             ON b.id=be.block_id AND be.ident = %s AND be.removed IS NULL
             WHERE
-                b.added > %s
+                b.added >= %s
             AND
                 (b.unblock_at IS NULL OR
                  b.unblock_at > %s)
