@@ -135,12 +135,13 @@ class BlockQueue(generics.ListAPIView):
     def get_queryset(self):
         ident = self.kwargs['ident']
         timeout = int(self.request.query_params.get('timeout', 0))
+        added_since = self.request.query_params.get('added_since', '2014-09-01')
         if not timeout:
-            return BHRDB().block_queue(ident, limit=200)
+            return BHRDB().block_queue(ident, limit=200, added_since=added_since)
 
         end = time.time() + timeout
         while time.time() < end:
-            blocks = BHRDB().block_queue(ident, limit=200)
+            blocks = BHRDB().block_queue(ident, limit=200, added_since=added_since)
             if list(blocks):
                 return blocks
             time.sleep(1.0)

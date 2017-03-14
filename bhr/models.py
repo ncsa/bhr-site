@@ -316,21 +316,25 @@ class BHRDB(object):
         b.set_unblocked()
         b.save()
 
-    def block_queue(self, ident, limit=200):
+    def block_queue(self, ident, limit=200, added_since='2014-09-01'):
         return Block.objects.raw("""
             SELECT b.id as pk, * from bhr_block b
             LEFT JOIN bhr_blockentry be
             ON b.id=be.block_id AND be.ident = %s AND be.removed IS NULL
             WHERE
+                b.added > %s
+            AND
                 (b.unblock_at IS NULL OR
                  b.unblock_at > %s)
             AND
                 b.forced_unblock is false
             AND
                 be.added IS NULL
+            ORDER BY
+                b.added ASC
             LIMIT %s """,
 
-            [ident, timezone.now(), limit]
+            [ident, added_since, timezone.now(), limit]
         )
 
     def unblock_queue(self, ident):
