@@ -120,7 +120,7 @@ class Block(models.Model):
     source = models.CharField(max_length=30, db_index=True)
     why  = models.TextField()
 
-    added = models.DateTimeField('date added', auto_now_add=True)
+    added = models.DateTimeField('date added', auto_now_add=True, db_index=True)
     unblock_at = models.DateTimeField('date to be unblocked', null=True)
 
     flag = models.CharField(max_length=1, choices=FLAG_DIRECTIONS, default=FLAG_NONE)
