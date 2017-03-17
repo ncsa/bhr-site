@@ -10,7 +10,7 @@ urlpatterns = [
 
     url(r'^admin/', include(admin.site.urls)),
     url(r'^bhr/', include('bhr.urls')),
-    url(r'^accounts/login/$', auth_views.login, {'template_name': 'login.html'}, name='login'),
+    url(r'^accounts/login/$', auth_views.login, {'template_name': 'login.html'}, name='accounts_login'),
     url(r'^accounts/logout/$', auth_views.logout, name='logout'),
 
     url(r'^$', RedirectView.as_view(url='/bhr', permanent=False), name='siteroot'),
