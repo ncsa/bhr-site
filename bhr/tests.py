@@ -688,6 +688,16 @@ class ApiTest(TestCase):
         block = self.client.get("/bhr/api/query/1.1.1.1").data[0]
         self.assertEqual(block['unblock_at'], None)
 
+    def test_block_extend_True_from_infinite_with_infinite_does_not_crash(self):
+        self._add_block('1.1.1.1', source='one', duration=0)
+        self._add_block('1.1.1.1', source='one', duration=0, extend=True)
+
+    def test_block_extend_to_infinite_works(self):
+        self._add_block('1.1.1.1', source='one', duration=60)
+        self._add_block('1.1.1.1', source='one', duration=0, extend=True)
+        block = self.client.get("/bhr/api/query/1.1.1.1").data[0]
+        self.assertEqual(block['unblock_at'], None)
+
 class UtilTest(TestCase):
     def test_expand_time(self):
         cases = [

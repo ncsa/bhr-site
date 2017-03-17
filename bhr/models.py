@@ -260,7 +260,7 @@ class BHRDB(object):
 
         b = self.get_block(cidr)
         if b:
-            if extend is False or b.unblock_at is None or unblock_at <= b.unblock_at:
+            if extend is False or b.unblock_at is None or (unblock_at and unblock_at <= b.unblock_at):
                 logger.info('DUPE IP=%s', cidr)
                 return b
             b.unblock_at = unblock_at
