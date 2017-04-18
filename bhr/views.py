@@ -229,8 +229,15 @@ class bhlist(APIView):
     permission_classes = [DjangoModelPermissions]
     queryset = Block.objects.none()  # Required for DjangoModelPermissions
     def get(self, request):
-        resp = []
-        blocks = BHRDB().expected().values_list('cidr','who__username','source','why', 'added', 'unblock_at')
+        #TODO: http://www.django-rest-framework.org/api-guide/filtering/ ?
+        source = self.request.query_params.get('source', None)
+        since = self.request.query_params.get('since', None)
+        queryset = BHRDB().expected()
+        if source:
+            queryset = queryset.filter(source=source)
+        if since:
+            queryset = queryset.filter(added__gte=since).order_by('added')
+        blocks = queryset.values_list('cidr','who__username','source','why', 'added', 'unblock_at')
         return respond_csv(blocks, ["cidr", "who", "source", "why", "added", "unblock_at"])
 
 @api_view(["GET"])
