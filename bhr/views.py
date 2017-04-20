@@ -38,6 +38,9 @@ class WhitelistViewSet(viewsets.ModelViewSet):
     def pre_save(self, obj):
         obj.who = self.request.user
         return super(WhitelistViewSet, self).pre_save(obj)
+    
+    def perform_create(self, serializer):
+        serializer.save(who = self.request.user)
 
 class BlockEntryViewset(viewsets.ModelViewSet):
     serializer_class = BlockEntrySerializer
@@ -60,6 +63,9 @@ class BlockViewset(viewsets.ModelViewSet):
         """Force who to the current user on save"""
         obj.who = self.request.user
         return super(BlockViewset, self).pre_save(obj)
+    
+    def perform_create(self, serializer):
+        serializer.save(who = self.request.user)
 
     @detail_route(methods=['post'])
     def set_blocked(self, request, pk=None):
