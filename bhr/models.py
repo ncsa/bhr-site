@@ -320,7 +320,7 @@ class BHRDB(object):
         return Block.objects.raw("""
             SELECT b.id as pk, * from bhr_block b
             LEFT JOIN bhr_blockentry be
-            ON b.id=be.block_id AND be.ident = %s AND be.removed IS NULL
+            ON b.id=be.block_id AND be.ident = %s
             WHERE
                 b.added >= %s
             AND
@@ -329,7 +329,7 @@ class BHRDB(object):
             AND
                 b.forced_unblock is false
             AND
-                be.added IS NULL
+                be.added IS NULL AND be.removed is NULL
             ORDER BY
                 b.added ASC
             LIMIT %s """,
