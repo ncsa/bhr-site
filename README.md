@@ -85,6 +85,8 @@ Development
     $ docker-compose run --rm web python manage.py createsuperuser
     $ docker-compose run --rm web python manage.py creategroups
     $ docker-compose up
+    ...
+    $ docker-compose run --rm web python manage.py test -v 2
 
 Related projects
 ================
