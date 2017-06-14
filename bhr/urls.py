@@ -34,6 +34,8 @@ urlpatterns = [
     url(r'^api/unblock_queue/(?P<ident>.+)', views.UnBlockQueue.as_view()),
     url(r'^api/query/(?P<cidr>.+)', views.BlockHistory.as_view()),
 
+    url(r'^api/whitelist$', views.Whitelist.as_view()),
+
     url('^$', browser_views.IndexView.as_view(), name="home"),
     url('^add$', permission_required('bhr.add_block', raise_exception=True)(browser_views.AddView.as_view()), name="add"),
     url('^query$', login_required(browser_views.QueryView.as_view()), name="query"),
