@@ -214,6 +214,15 @@ class set_unblocked_multi(APIView):
         BHRDB().set_unblocked_multi(ids)
         return Response({'status': 'ok'})
 
+class Whitelist(APIView):
+    permission_classes = [make_permissions_class('bhr.add_whitelistentry')]
+    def post(self,request):
+        serializer - WhitelistEntrySerializer(data=request.data)
+        if serializer.is_valid():
+            d = serializer.validated_data
+            WhitelistEntry(who=request.user, why=d['why'], cidr=d['cidr']).save()
+            return Response({'status': 'ok'})
+
 @api_view(["GET"])
 def stats(request):
     db = BHRDB()
