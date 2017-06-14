@@ -66,7 +66,7 @@ Create `bhr_site/settings_local.py` with something like:
         'local_networks':               ['10.0.0.0/8'],
     }
 
-Be sure to genrate a site specific random SECRET\_KEY
+Be sure to generate a site specific random SECRET\_KEY
 
 The unauthenticated\_limited\_query setting enables:
 
@@ -77,6 +77,16 @@ The unauthenticated\_limited\_query setting enables:
 These do not require authentication but return a subset of the fields.
 
 And configure apache similar to examples/apache.conf
+
+Development
+===========
+
+    $ docker-compose run --rm web python manage.py migrate
+    $ docker-compose run --rm web python manage.py createsuperuser
+    $ docker-compose run --rm web python manage.py creategroups
+    $ docker-compose up
+    ...
+    $ docker-compose run --rm web python manage.py test -v 2
 
 Related projects
 ================

@@ -120,14 +120,14 @@ class Block(models.Model):
     source = models.CharField(max_length=30, db_index=True)
     why  = models.TextField()
 
-    added = models.DateTimeField('date added', auto_now_add=True)
+    added = models.DateTimeField('date added', auto_now_add=True, db_index=True)
     unblock_at = models.DateTimeField('date to be unblocked', null=True, db_index=True)
 
     flag = models.CharField(max_length=1, choices=FLAG_DIRECTIONS, default=FLAG_NONE)
 
     skip_whitelist = models.BooleanField(default=False)
 
-    forced_unblock  = models.BooleanField(default=False, db_index=True)
+    forced_unblock  = models.BooleanField(default=False)
     unblock_why = models.TextField(blank=True)
     unblock_who = models.ForeignKey(User, related_name='+', null=True, blank=True)
 
@@ -260,7 +260,7 @@ class BHRDB(object):
 
         b = self.get_block(cidr)
         if b:
-            if extend is False or b.unblock_at is None or unblock_at <= b.unblock_at:
+            if extend is False or b.unblock_at is None or (unblock_at and unblock_at <= b.unblock_at):
                 logger.info('DUPE IP=%s', cidr)
                 return b
             b.unblock_at = unblock_at
@@ -316,21 +316,25 @@ class BHRDB(object):
         b.set_unblocked()
         b.save()
 
-    def block_queue(self, ident, limit=200):
+    def block_queue(self, ident, limit=200, added_since='2014-09-01'):
         return Block.objects.raw("""
             SELECT b.id as pk, * from bhr_block b
             LEFT JOIN bhr_blockentry be
-            ON b.id=be.block_id AND be.ident = %s AND be.removed IS NULL
+            ON b.id=be.block_id AND be.ident = %s
             WHERE
+                b.added >= %s
+            AND
                 (b.unblock_at IS NULL OR
                  b.unblock_at > %s)
             AND
                 b.forced_unblock is false
             AND
-                be.added IS NULL
+                be.added IS NULL AND be.removed is NULL
+            ORDER BY
+                b.added ASC
             LIMIT %s """,
 
-            [ident, timezone.now(), limit]
+            [ident, added_since, timezone.now(), limit]
         )
 
     def unblock_queue(self, ident):

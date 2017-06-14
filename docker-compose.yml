@@ -1,16 +1,18 @@
-db:
-  image: postgres
-  environment:
-    POSTGRES_DB: bhr
+version: '2'
+services:
+    db:
+      image: postgres
+      environment:
+        POSTGRES_DB: bhr
 
-web:
-  environment:
-    DATABASE_URL: postgres://postgres@db/bhr
-  build: .
-  command: python manage.py runserver 0.0.0.0:8000
-  volumes:
-    - .:/app
-  ports:
-    - "8000:8000"
-  links:
-    - db
+    web:
+      environment:
+        DATABASE_URL: postgres://postgres@db/bhr
+      build: .
+      command: python manage.py runserver 0.0.0.0:8000
+      volumes:
+        - .:/app
+      ports:
+        - "8000:8000"
+      depends_on:
+        - db

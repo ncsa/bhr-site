@@ -38,6 +38,9 @@ class WhitelistViewSet(viewsets.ModelViewSet):
     def pre_save(self, obj):
         obj.who = self.request.user
         return super(WhitelistViewSet, self).pre_save(obj)
+    
+    def perform_create(self, serializer):
+        serializer.save(who = self.request.user)
 
 class BlockEntryViewset(viewsets.ModelViewSet):
     serializer_class = BlockEntrySerializer
@@ -60,6 +63,9 @@ class BlockViewset(viewsets.ModelViewSet):
         """Force who to the current user on save"""
         obj.who = self.request.user
         return super(BlockViewset, self).pre_save(obj)
+    
+    def perform_create(self, serializer):
+        serializer.save(who = self.request.user)
 
     @detail_route(methods=['post'])
     def set_blocked(self, request, pk=None):
@@ -135,12 +141,13 @@ class BlockQueue(generics.ListAPIView):
     def get_queryset(self):
         ident = self.kwargs['ident']
         timeout = int(self.request.query_params.get('timeout', 0))
+        added_since = self.request.query_params.get('added_since', '2014-09-01')
         if not timeout:
-            return BHRDB().block_queue(ident, limit=200)
+            return BHRDB().block_queue(ident, limit=200, added_since=added_since)
 
         end = time.time() + timeout
         while time.time() < end:
-            blocks = BHRDB().block_queue(ident, limit=200)
+            blocks = BHRDB().block_queue(ident, limit=200, added_since=added_since)
             if list(blocks):
                 return blocks
             time.sleep(1.0)
@@ -237,8 +244,15 @@ class bhlist(APIView):
     permission_classes = [DjangoModelPermissions]
     queryset = Block.objects.none()  # Required for DjangoModelPermissions
     def get(self, request):
-        resp = []
-        blocks = BHRDB().expected().values_list('cidr','who__username','source','why', 'added', 'unblock_at')
+        #TODO: http://www.django-rest-framework.org/api-guide/filtering/ ?
+        source = self.request.query_params.get('source', None)
+        since = self.request.query_params.get('since', None)
+        queryset = BHRDB().expected()
+        if source:
+            queryset = queryset.filter(source=source)
+        if since:
+            queryset = queryset.filter(added__gte=since).order_by('added')
+        blocks = queryset.values_list('cidr','who__username','source','why', 'added', 'unblock_at')
         return respond_csv(blocks, ["cidr", "who", "source", "why", "added", "unblock_at"])
 
 @api_view(["GET"])
