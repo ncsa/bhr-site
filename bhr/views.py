@@ -232,19 +232,33 @@ def metrics(request):
 
     stats = db.stats()
     source_stats = db.source_stats()
-    now = int(time.time())
+    now = int(1000 * time.time())
 
     out = []
     def add(k, v):
         out.append("bhr_{} {} {}\n".format(k, v, now))
 
-    add('stats{stat="current"}', stats["current"])
-    add('stats{stat="expected"}', stats["expected"])
-    add('stats{stat="block_pending"}', stats["block_pending"])
-    add('stats{stat="unblock_pending"}', stats["unblock_pending"])
+    out.append('''
+# HELP bhr_blocked_total total hosts blocked
+# TYPE bhr_blocked_total gauge
+''')
 
+    add('blocked_total{type="current"}', stats["current"])
+    add('blocked_total{type="expected"}', stats["expected"])
+
+    out.append('''
+# HELP bhr_pending_total total hosts pending
+# TYPE bhr_pending_total gauge
+''')
+    add('pending_total{type="block"}', stats["block_pending"])
+    add('pending_total{type="unblock"}', stats["unblock_pending"])
+
+    out.append('''
+# HELP bhr_blocked_total_by_source total hosts blocked by each source
+# TYPE bhr_blocked_total_by_source gauge
+''')
     for source, count in source_stats.items():
-        add('source{source="%s"}' % source, count)
+        add('blocked_total_by_source{source="%s"}' % source, count)
 
     resp = "".join(out)
     return HttpResponse(resp, content_type="text/plain")
