@@ -238,10 +238,10 @@ def metrics(request):
     def add(k, v):
         out.append("bhr_{} {} {}\n".format(k, v, now))
 
-    add("current", stats["current"])
-    add("expected", stats["expected"])
-    add("block_pending", stats["block_pending"])
-    add("unblock_pending", stats["unblock_pending"])
+    add('stats{stat="current"}', stats["current"])
+    add('stats{stat="expected"}', stats["expected"])
+    add('stats{stat="block_pending"}', stats["block_pending"])
+    add('stats{stat="unblock_pending"}', stats["unblock_pending"])
 
     for source, count in source_stats.items():
         add('source{source="%s"}' % source, count)
