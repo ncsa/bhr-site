@@ -15,10 +15,13 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.settings import api_settings
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions, BasePermission
 from rest_framework_csv.renderers import CSVRenderer
+from rest_framework.response import Response
 
 from django.db import transaction
 from django.db.models import Q
+from django.http import HttpResponse
 from django.utils import timezone
+from django.views.decorators.cache import cache_page
 import datetime
 import time
 
@@ -161,8 +164,6 @@ class UnBlockQueue(generics.ListAPIView):
         ident = self.kwargs['ident']
         return BHRDB().unblock_queue(ident)[:200]
 
-from rest_framework.response import Response
-
 class block(APIView):
     permission_classes = [make_permission_class('bhr.add_block')]
     def post(self, request):
@@ -222,6 +223,31 @@ def stats(request):
     stats['sources'] = db.source_stats()
 
     return Response(stats)
+
+@api_view(["GET"])
+@cache_page(60*5)
+def metrics(request):
+    """Export metrics in a format that prometheus can understand"""
+    db = BHRDB()
+
+    stats = db.stats()
+    source_stats = db.source_stats()
+    now = int(time.time())
+
+    out = []
+    def add(k, v):
+        out.append("bhr_{} {} {}\n".format(k, v, now))
+
+    add("current", stats["current"])
+    add("expected", stats["expected"])
+    add("block_pending", stats["block_pending"])
+    add("unblock_pending", stats["unblock_pending"])
+
+    for source, count in source_stats.items():
+        add('source{source="%s"}' % source, count)
+
+    resp = "".join(out)
+    return HttpResponse(resp, content_type="text/plain")
 
 @api_view(["GET"])
 def source_stats(request):
