@@ -190,7 +190,7 @@ class BlockEntry(models.Model):
     ident = models.CharField("blocker ident", max_length=50, db_index=True)
 
     added   = models.DateTimeField('date added', auto_now_add=True)
-    removed =  models.DateTimeField('date removed', null=True, db_index=True)
+    removed =  models.DateTimeField('date removed', null=True)
 
     class Meta:
         unique_together = ('block', 'ident')
