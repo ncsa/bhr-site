@@ -258,26 +258,26 @@ class BHRDB(object):
         if duration and not unblock_at:
             unblock_at = now + datetime.timedelta(seconds=duration)
 
-        b = self.get_block(cidr)
-        if b:
-            if extend is False or b.unblock_at is None or (unblock_at and unblock_at <= b.unblock_at):
-                logger.info('DUPE IP=%s', cidr)
-                return b
-            b.unblock_at = unblock_at
-            logger.info('EXTEND IP=%s time extended UNTIL=%s DURATION=%s', cidr, unblock_at, duration)
-            b.save()
-            return b
-
-        if duration and autoscale:
-            lb = self.get_last_block(cidr)
-            if lb and lb.duration:
-                last_duration = lb.duration and lb.duration.total_seconds() or duration
-                scaled_duration = max(duration, self.scale_duration(lb.age.total_seconds(), last_duration))
-                logger.info("Scaled duration from %d to %d", duration, scaled_duration)
-                duration = scaled_duration
-                unblock_at = now + datetime.timedelta(seconds=duration)
-
         with transaction.atomic():
+            b = self.get_block(cidr)
+            if b:
+                if extend is False or b.unblock_at is None or (unblock_at and unblock_at <= b.unblock_at):
+                    logger.info('DUPE IP=%s', cidr)
+                    return b
+                b.unblock_at = unblock_at
+                logger.info('EXTEND IP=%s time extended UNTIL=%s DURATION=%s', cidr, unblock_at, duration)
+                b.save()
+                return b
+
+            if duration and autoscale:
+                lb = self.get_last_block(cidr)
+                if lb and lb.duration:
+                    last_duration = lb.duration and lb.duration.total_seconds() or duration
+                    scaled_duration = max(duration, self.scale_duration(lb.age.total_seconds(), last_duration))
+                    logger.info("Scaled duration from %d to %d", duration, scaled_duration)
+                    duration = scaled_duration
+                    unblock_at = now + datetime.timedelta(seconds=duration)
+
             b = Block(cidr=cidr, who=who, source=source, why=why, added=now, unblock_at=unblock_at, skip_whitelist=skip_whitelist)
             b.save()
 
