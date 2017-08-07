@@ -2,13 +2,14 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.db.models import Q
-from django.db import transaction, connection
+from django.db import transaction, connection, OperationalError
 
 from netfields import CidrAddressField
 import ipaddress
 
 from django.utils import timezone
 import datetime
+import time
 
 from django.conf import settings
 
@@ -251,6 +252,14 @@ class BHRDB(object):
         return duration/return_to_base_factor;
 
     def add_block(self, cidr, who, source, why, duration=None, unblock_at=None, skip_whitelist=False, extend=True, autoscale=False):
+        """Attempt to add a block, if a concurrent request caused a conflict, sleep for 10ms and try again"""
+        try:
+            return self.add_block_real(cidr, who, source, why, duration, unblock_at, skip_whitelist, extend, autoscale)
+        except OperationalError:
+            time.sleep(0.01)
+            return self.add_block_real(cidr, who, source, why, duration, unblock_at, skip_whitelist, extend, autoscale)
+
+    def add_block_real(self, cidr, who, source, why, duration=None, unblock_at=None, skip_whitelist=False, extend=True, autoscale=False):
         if duration:
             duration = expand_time(duration)
 
