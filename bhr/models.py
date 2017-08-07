@@ -275,7 +275,7 @@ class BHRDB(object):
         created = []
         with transaction.atomic():
             for block in blocks:
-                b = self.add_block_real(who=request.user, **block)
+                b = self.add_block_real(who=who, **block)
                 created.append(b)
         return created
 
