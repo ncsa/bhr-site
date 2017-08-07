@@ -164,9 +164,3 @@ except NameError:
         from settings_local import *
     except ImportError:
         pass
-
-#Ensure the serializable database connection exists
-import psycopg2
-DATABASES['default']['OPTIONS'] = {
-    'isolation_level': psycopg2.extensions.ISOLATION_LEVEL_SERIALIZABLE,
-}

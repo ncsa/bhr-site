@@ -1,8 +1,10 @@
+from django_pglocks import advisory_lock
+
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.db.models import Q
-from django.db import transaction, connection, OperationalError
+from django.db import transaction, connection
 
 from netfields import CidrAddressField
 import ipaddress
@@ -259,38 +261,15 @@ class BHRDB(object):
         #regular repeat offender
         return duration/return_to_base_factor;
 
-
     def add_block_multi(self, who, blocks):
-        """Attempt to add blocks, if a concurrent request caused a conflict, sleep for 100ms and try again"""
-        for retry in reversed(range(3)):
-            try:
-                return self.add_block_multi_real(who, blocks)
-            except OperationalError:
-                if retry == 0:
-                    raise
-                logger.info('BLOCK MULTI OperationalError, retrying...')
-                time.sleep(.1)
-
-    def add_block_multi_real(self, who, blocks):
         created = []
         with transaction.atomic():
             for block in blocks:
-                b = self.add_block_real(who=who, **block)
+                b = self.add_block(who=who, **block)
                 created.append(b)
         return created
 
     def add_block(self, cidr, who, source, why, duration=None, unblock_at=None, skip_whitelist=False, extend=True, autoscale=False):
-        """Attempt to add a block, if a concurrent request caused a conflict, sleep for 100ms and try again"""
-        for retry in reversed(range(3)):
-            try:
-                return self.add_block_real(cidr, who, source, why, duration, unblock_at, skip_whitelist, extend, autoscale)
-            except OperationalError:
-                if retry == 0:
-                    raise
-                logger.info('BLOCK IP=%s OperationalError, retrying...', cidr)
-                time.sleep(.1)
-
-    def add_block_real(self, cidr, who, source, why, duration=None, unblock_at=None, skip_whitelist=False, extend=True, autoscale=False):
         if duration:
             duration = expand_time(duration)
 
@@ -298,7 +277,7 @@ class BHRDB(object):
         if duration and not unblock_at:
             unblock_at = now + datetime.timedelta(seconds=duration)
 
-        with transaction.atomic():
+        with transaction.atomic(), advisory_lock(cidr) as acquired:
             b = self.get_block(cidr)
             if b:
                 if extend is False or b.unblock_at is None or (unblock_at and unblock_at <= b.unblock_at):
@@ -393,15 +372,6 @@ class BHRDB(object):
                 logger.info("SET_BLOCKED ID=%s IP=%s IDENT=%s", id, block.cidr, ident)
 
     def set_unblocked_multi(self, ids):
-        """Attempt to mark blocks as unblocked, if a concurrent request caused a conflict, sleep for 100ms and try again"""
-        try:
-            return self.set_unblocked_multi_real(ids)
-        except OperationalError:
-            logger.info("SET_UNBLOCKED OperationalError, retrying...")
-            time.sleep(.1)
-            return self.set_unblocked_multi_real(ids)
-
-    def set_unblocked_multi_real(self, ids):
         with transaction.atomic():
             for id in ids:
                 BlockEntry.set_unblocked_by_id(id)

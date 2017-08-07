@@ -8,3 +8,4 @@ python-dateutil==2.4.2
 dj-database-url==0.4.1
 whitenoise==3.0
 gunicorn==19.4.5
+django-pglocks==1.0.2
