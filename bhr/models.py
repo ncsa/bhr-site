@@ -259,9 +259,29 @@ class BHRDB(object):
         #regular repeat offender
         return duration/return_to_base_factor;
 
+
+    def add_block_multi(self, who, blocks):
+        """Attempt to add blocks, if a concurrent request caused a conflict, sleep for 100ms and try again"""
+        for retry in reversed(range(3)):
+            try:
+                return self.add_block_multi_real(who, blocks)
+            except OperationalError:
+                if retry == 0:
+                    raise
+                logger.info('BLOCK MULTI OperationalError, retrying...')
+                time.sleep(.1)
+
+    def add_block_multi_real(who, blocks):
+        created = []
+        with transaction.atomic():
+            for block in blocks:
+                b = self.add_block_real(who=request.user, **block)
+                created.append(b)
+        return created
+
     def add_block(self, cidr, who, source, why, duration=None, unblock_at=None, skip_whitelist=False, extend=True, autoscale=False):
         """Attempt to add a block, if a concurrent request caused a conflict, sleep for 100ms and try again"""
-        for retry in reversed(range(10)):
+        for retry in reversed(range(3)):
             try:
                 return self.add_block_real(cidr, who, source, why, duration, unblock_at, skip_whitelist, extend, autoscale)
             except OperationalError:

@@ -192,11 +192,7 @@ class mblock(APIView):
         serializer = BlockRequestSerializer(data=request.data, many=True)
         created = []
         if serializer.is_valid():
-            #FIXME: move this into BHRDB directly
-            with transaction.atomic():
-                for block in serializer.validated_data:
-                    b = BHRDB().add_block(who=request.user, **block)
-                    created.append(b)
+            created = BHRDB().add_block_multi(who=request.user, blocks=serializer.validated_data)
             return Response(BlockSerializer(created, many=True, context=context).data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
