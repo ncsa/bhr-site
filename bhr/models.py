@@ -40,7 +40,7 @@ def is_whitelisted(cidr):
 
 def is_prefixlen_too_small(cidr):
     minimum_prefixlen = settings.BHR.get('minimum_prefixlen', 24)
-    cidr = ipaddress.ip_network(cidr)
+    cidr = ipaddress.ip_network(unicode(cidr))
     return cidr.prefixlen < minimum_prefixlen
 
 def is_source_blacklisted(source):
