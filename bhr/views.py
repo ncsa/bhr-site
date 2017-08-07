@@ -78,7 +78,7 @@ class BlockViewset(viewsets.ModelViewSet):
         serializer = SetBlockedSerializer(data=request.data)
         if serializer.is_valid():
             ident = serializer.validated_data['ident']
-            block.blockentry_set.create(ident=ident)
+            BHRDB().set_blocked(block, ident)
             return Response({'status': 'ok'})
         else:
             return Response(serializer.errors,

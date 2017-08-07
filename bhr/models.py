@@ -180,18 +180,25 @@ class Block(models.Model):
         return timezone.now() - self.unblock_at
 
     def unblock_now(self, who, why):
+        logger.info("UNBLOCK_NOW ID=%s IP=%s", self.id, self.cidr)
         self.forced_unblock = True
         self.unblock_who = who
         self.unblock_why = why
-        self.unblock_at = timezone.now()
+        now = timezone.now()
+        self.unblock_at = now
+        BlockEntry.objects.filter(block_id=self.id).update(unblock_at=now)
         self.save()
 
 class BlockEntry(models.Model):
     block = models.ForeignKey(Block)
+
     ident = models.CharField("blocker ident", max_length=50, db_index=True)
 
     added   = models.DateTimeField('date added', auto_now_add=True)
     removed =  models.DateTimeField('date removed', null=True)
+
+    #Denormalized from Block
+    unblock_at = models.DateTimeField('date to be unblocked', null=True, db_index=True)
 
     class Meta:
         unique_together = ('block', 'ident')
@@ -281,6 +288,7 @@ class BHRDB(object):
                     logger.info('DUPE IP=%s', cidr)
                     return b
                 b.unblock_at = unblock_at
+                BlockEntry.objects.filter(block_id=b.id).update(unblock_at=unblock_at)
                 logger.info('EXTEND IP=%s time extended UNTIL=%s DURATION=%s', cidr, unblock_at, duration)
                 b.save()
                 return b
@@ -319,7 +327,7 @@ class BHRDB(object):
 
     def set_blocked(self, b, ident):
         logger.info("SET_BLOCKED ID=%s IP=%s IDENT=%s", b.id, b.cidr, ident)
-        return b.blockentry_set.create(ident=ident)
+        return b.blockentry_set.create(ident=ident, unblock_at=b.unblock_at)
 
     def set_unblocked(self, b, ident):
         b = b.blockentry_set.get(ident=ident)
@@ -354,14 +362,18 @@ class BHRDB(object):
         )
 
     def unblock_queue(self, ident):
-        return BlockEntry.objects.filter(removed__isnull=True, ident=ident).filter(
-            block_id__in = self.expired().values_list('id', flat=True))
+        return BlockEntry.objects.filter(
+            removed__isnull=True,
+            ident=ident,
+            unblock_at__lte=timezone.now(),
+        )
 
     def set_blocked_multi(self, ident, ids):
         with transaction.atomic():
             for id in ids:
-                BlockEntry.objects.create(block_id=id, ident=ident)
-                logger.info("SET_BLOCKED ID=%s IDENT=%s", id, ident)
+                block = Block.objects.get(pk=id)
+                block.blockentry_set.create(ident=ident, unblock_at=block.unblock_at)
+                logger.info("SET_BLOCKED ID=%s IP=%s IDENT=%s", id, block.cidr, ident)
 
     def set_unblocked_multi(self, ids):
         """Attempt to mark blocks as unblocked, if a concurrent request caused a conflict, sleep for 100ms and try again"""
