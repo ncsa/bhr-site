@@ -140,7 +140,7 @@ class Block(models.Model):
     expired = ExpiredBlockManager()
 
     def save(self, *args, **kwargs):
-        if not self.skip_whitelist and not self.unblock_now:
+        if self.skip_whitelist is False and self.forced_unblock is False:
             wle = is_whitelisted(self.cidr)
             if wle:
                 raise WhitelistError(wle.why)
