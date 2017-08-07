@@ -353,9 +353,8 @@ class BHRDB(object):
     def set_blocked_multi(self, ident, ids):
         with transaction.atomic():
             for id in ids:
-                block = Block.objects.get(pk=id)
-                block.blockentry_set.create(ident=ident)
-                logger.info("SET_BLOCKED ID=%s IP=%s IDENT=%s", id, block.cidr, ident)
+                BlockEntry.objects.create(block_id=id, ident=ident)
+                logger.info("SET_BLOCKED ID=%s IDENT=%s", id, ident)
 
     def set_unblocked_multi(self, ids):
         with transaction.atomic():
