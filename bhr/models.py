@@ -265,7 +265,6 @@ class BHRDB(object):
                     raise
                 logger.info('BLOCK IP=%s OperationalError, retrying...', cidr)
                 time.sleep(.1)
-                return self.add_block_real(cidr, who, source, why, duration, unblock_at, skip_whitelist, extend, autoscale)
 
     def add_block_real(self, cidr, who, source, why, duration=None, unblock_at=None, skip_whitelist=False, extend=True, autoscale=False):
         if duration:
