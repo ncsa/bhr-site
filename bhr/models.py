@@ -199,6 +199,10 @@ class BlockEntry(models.Model):
     def set_unblocked(self):
         self.removed = timezone.now()
 
+    @classmethod
+    def set_unblocked_by_id(self, id):
+        BlockEntry.objects.filter(pk=id).update(removed=timezone.now())
+
 class BHRDB(object):
     def __init__(self):
         pass
@@ -252,11 +256,12 @@ class BHRDB(object):
         return duration/return_to_base_factor;
 
     def add_block(self, cidr, who, source, why, duration=None, unblock_at=None, skip_whitelist=False, extend=True, autoscale=False):
-        """Attempt to add a block, if a concurrent request caused a conflict, sleep for 10ms and try again"""
+        """Attempt to add a block, if a concurrent request caused a conflict, sleep for 100ms and try again"""
         try:
             return self.add_block_real(cidr, who, source, why, duration, unblock_at, skip_whitelist, extend, autoscale)
         except OperationalError:
-            time.sleep(0.01)
+            logger.info('BLOCK IP=%s OperationalError, retrying...', cidr)
+            time.sleep(.1)
             return self.add_block_real(cidr, who, source, why, duration, unblock_at, skip_whitelist, extend, autoscale)
 
     def add_block_real(self, cidr, who, source, why, duration=None, unblock_at=None, skip_whitelist=False, extend=True, autoscale=False):
@@ -357,12 +362,19 @@ class BHRDB(object):
                 logger.info("SET_BLOCKED ID=%s IDENT=%s", id, ident)
 
     def set_unblocked_multi(self, ids):
+        """Attempt to mark blocks as unblocked, if a concurrent request caused a conflict, sleep for 100ms and try again"""
+        try:
+            return self.set_unblocked_multi_real(ids)
+        except OperationalError:
+            logger.info("SET_UNBLOCKED OperationalError, retrying...")
+            time.sleep(.1)
+            return self.set_unblocked_multi_real(ids)
+
+    def set_unblocked_multi_real(self, ids):
         with transaction.atomic():
             for id in ids:
-                entry = BlockEntry.objects.get(pk=id)
-                entry.set_unblocked()
-                entry.save()
-                logger.info("SET_UNBLOCKED ID=%s IP=%s IDENT=%s", entry.block.id, entry.block.cidr, entry.ident)
+                BlockEntry.set_unblocked_by_id(id)
+                logger.info("SET_UNBLOCKED ID=%s", id)
 
     def get_history(self, query):
         if query[0].isdigit(): #assume cidr block

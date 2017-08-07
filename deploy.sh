@@ -1,6 +1,6 @@
 #!/bin/sh -ex
 
-REMOTE=bhr@bhr-sec
+REMOTE=bhr@bhr
 
 function test() {
     Echo "Testing.."
