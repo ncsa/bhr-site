@@ -158,6 +158,7 @@ class DBTests(TestCase):
     def test_unblock_now_moves_to_pending_removal(self):
         b1 = self.db.add_block('1.2.3.4', self.user, 'test', 'testing')
         self.db.unblock_now('1.2.3.4', self.user, 'testing')
+        b1.refresh_from_db()
 
         #it needs to be blocked on a host to be able to be pending unblock
         self.db.set_blocked(b1, 'bgp1')
