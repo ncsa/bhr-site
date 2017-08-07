@@ -271,7 +271,7 @@ class BHRDB(object):
                 logger.info('BLOCK MULTI OperationalError, retrying...')
                 time.sleep(.1)
 
-    def add_block_multi_real(who, blocks):
+    def add_block_multi_real(self, who, blocks):
         created = []
         with transaction.atomic():
             for block in blocks:
