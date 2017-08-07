@@ -257,12 +257,15 @@ class BHRDB(object):
 
     def add_block(self, cidr, who, source, why, duration=None, unblock_at=None, skip_whitelist=False, extend=True, autoscale=False):
         """Attempt to add a block, if a concurrent request caused a conflict, sleep for 100ms and try again"""
-        try:
-            return self.add_block_real(cidr, who, source, why, duration, unblock_at, skip_whitelist, extend, autoscale)
-        except OperationalError:
-            logger.info('BLOCK IP=%s OperationalError, retrying...', cidr)
-            time.sleep(.1)
-            return self.add_block_real(cidr, who, source, why, duration, unblock_at, skip_whitelist, extend, autoscale)
+        for retry in reversed(range(10)):
+            try:
+                return self.add_block_real(cidr, who, source, why, duration, unblock_at, skip_whitelist, extend, autoscale)
+            except OperationalError:
+                if retry == 0:
+                    raise
+                logger.info('BLOCK IP=%s OperationalError, retrying...', cidr)
+                time.sleep(.1)
+                return self.add_block_real(cidr, who, source, why, duration, unblock_at, skip_whitelist, extend, autoscale)
 
     def add_block_real(self, cidr, who, source, why, duration=None, unblock_at=None, skip_whitelist=False, extend=True, autoscale=False):
         if duration:
