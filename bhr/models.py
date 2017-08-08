@@ -362,7 +362,7 @@ class BHRDB(object):
             removed__isnull=True,
             ident=ident,
             unblock_at__lte=timezone.now(),
-        )
+        ).order_by('unblock_at')
 
     def set_blocked_multi(self, ident, ids):
         with transaction.atomic():
