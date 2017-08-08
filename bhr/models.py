@@ -263,7 +263,7 @@ class BHRDB(object):
 
     def add_block_multi(self, who, blocks):
         created = []
-        with transaction.atomic():
+        with advisory_lock("add_block"), transaction.atomic():
             for block in blocks:
                 b = self.add_block(who=who, **block)
                 created.append(b)
@@ -277,7 +277,7 @@ class BHRDB(object):
         if duration and not unblock_at:
             unblock_at = now + datetime.timedelta(seconds=duration)
 
-        with advisory_lock(cidr) as acquired, transaction.atomic():
+        with advisory_lock("add_block") as acquired, transaction.atomic():
             b = self.get_block(cidr)
             if b:
                 if extend is False or b.unblock_at is None or (unblock_at and unblock_at <= b.unblock_at):
