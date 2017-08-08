@@ -277,7 +277,7 @@ class BHRDB(object):
         if duration and not unblock_at:
             unblock_at = now + datetime.timedelta(seconds=duration)
 
-        with transaction.atomic(), advisory_lock(cidr) as acquired:
+        with advisory_lock(cidr) as acquired, transaction.atomic():
             b = self.get_block(cidr)
             if b:
                 if extend is False or b.unblock_at is None or (unblock_at and unblock_at <= b.unblock_at):
