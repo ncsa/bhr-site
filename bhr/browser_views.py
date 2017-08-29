@@ -77,7 +77,7 @@ class DoUnblockView(FormView):
         for b in blocks:
             b.unblock_now(self.request.user, why)
 
-        if query:
+        if query and query != "list":
             return redirect(reverse("query") + "?query=" + query)
         else:
             return redirect(reverse("list"))
