@@ -13,20 +13,20 @@ function setup() {
 
 function upload() {
     echo "Uploading.."
-    rsync --exclude '*settings_local.py' -a . ${REMOTE}:bhr_project/
+    rsync --exclude '*settings_local.py' -a . ${REMOTE}:bhr-site/
 }
 
 function install() {
-    ssh $REMOTE 'bhr_env/bin/pip install -r bhr_project/requirements.txt'
+    ssh $REMOTE 'bhr_env/bin/pip install -r bhr-site/requirements.txt'
 }
 
 function migrate() {
-    ssh -t $REMOTE 'cd bhr_project; ~/bhr_env/bin/python manage.py migrate'
-    ssh -t $REMOTE 'cd bhr_project; ~/bhr_env/bin/python manage.py collectstatic --noinput'
+    ssh -t $REMOTE 'cd bhr-site; ~/bhr_env/bin/python manage.py migrate'
+    ssh -t $REMOTE 'cd bhr-site; ~/bhr_env/bin/python manage.py collectstatic --noinput'
 }
 
 function reload() {
-    ssh $REMOTE 'touch bhr_project/bhr_site/wsgi.py'
+    ssh $REMOTE 'touch bhr-site/bhr_site/wsgi.py'
 }
 
 function deploy () {
