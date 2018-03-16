@@ -64,6 +64,8 @@ Create `bhr_site/settings_local.py` with something like:
         'return_to_base_factor':        2.0,
         'unauthenticated_limited_query':  True,
         'local_networks':               ['10.0.0.0/8'],
+        'minimum_prefixlen':            23,
+        'minimum_prefixlen_v6':         64,
     }
 
 Be sure to generate a site specific random SECRET\_KEY

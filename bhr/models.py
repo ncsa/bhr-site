@@ -18,7 +18,7 @@ from django.conf import settings
 from urllib import quote
 import logging
 
-from bhr.util import expand_time, resolve
+from bhr.util import expand_time, resolve, ip_family
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,11 @@ def is_whitelisted(cidr):
     return False
 
 def is_prefixlen_too_small(cidr):
-    minimum_prefixlen = settings.BHR.get('minimum_prefixlen', 24)
+    family = ip_family(cidr)
+    if family == 4:
+        minimum_prefixlen = settings.BHR.get('minimum_prefixlen', 24)
+    else:
+        minimum_prefixlen = settings.BHR.get('minimum_prefixlen_v6', 64)
     cidr = ipaddress.ip_network(unicode(cidr))
     return cidr.prefixlen < minimum_prefixlen
 
