@@ -3,6 +3,7 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 import dateutil.parser
 import datetime
+import ipaddress
 import json
 import csv
 
@@ -252,10 +253,23 @@ class DBTests(TestCase):
         WhitelistEntry(who=self.user, why='test', cidr='1.2.3.0/24').save()
         self.db.unblock_now('1.2.3.4', self.user, 'testing')
 
+    @override_settings()
     def test_prefixlen_too_small(self):
-        self.assertEqual(bool(is_prefixlen_too_small(u"1.2.3.4")), False)
-        self.assertEqual(bool(is_prefixlen_too_small(u"1.2.3.0/24")), False)
-        self.assertEqual(bool(is_prefixlen_too_small(u"1.2.0.0/20")), True)
+        from django.conf import settings
+        settings.BHR['minimum_prefixlen'] = 24
+        self.assertEqual(is_prefixlen_too_small(u"1.2.3.4"), False)
+        self.assertEqual(is_prefixlen_too_small(u"1.2.3.0/24"), False)
+        self.assertEqual(is_prefixlen_too_small(u"1.2.0.0/20"), True)
+
+        settings.BHR['minimum_prefixlen'] = 32
+        self.assertEqual(is_prefixlen_too_small(u"1.2.3.0/24"), True)
+
+    @override_settings()
+    def test_prefixlen_too_small_v6(self):
+        from django.conf import settings
+        settings.BHR['minimum_prefixlen_v6'] = 64
+        self.assertEqual(is_prefixlen_too_small(u"fe80::/32"), True)
+        self.assertEqual(is_prefixlen_too_small(u"fe80::1/128"), False)
 
     def test_source_blacklisted(self):
         self.assertEqual(bool(is_source_blacklisted("test")), False)
@@ -744,6 +758,7 @@ class UtilTest(TestCase):
         cases = [
             ('1.2.3.4', 4),
             ('fe80::69b:c5:78a1:5ead', 6),
+            (ipaddress.ip_address(u'1.2.3.4'), 4),
         ]
         for ip, family in cases:
             self.assertEqual(ip_family(ip), family)

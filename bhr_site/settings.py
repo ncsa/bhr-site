@@ -142,6 +142,7 @@ BHR = {
     'return_to_base_factor':        2.0,
 
     'minimum_prefixlen': 23,
+    'minimum_prefixlen_v6': 64,
 
     'local_networks': ['10.0.0.0/8'],
 }

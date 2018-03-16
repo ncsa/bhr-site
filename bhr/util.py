@@ -50,10 +50,12 @@ def resolve(ip):
 
 def ip_family(address):
     """Return the ip family for the address
-        :param: address: ip address
+        :param: address: ip address string or ip address object
         :return: the ip family
         :rtype: int
     """
+    if hasattr(address, 'version'):
+        return address.version
     if '.' in address:
         return 4
     elif ':' in address:
