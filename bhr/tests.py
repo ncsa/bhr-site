@@ -7,7 +7,7 @@ import json
 import csv
 
 from bhr.models import BHRDB, Block, WhitelistEntry, SourceBlacklistEntry, is_whitelisted, is_prefixlen_too_small, is_source_blacklisted, filter_local_networks
-from bhr.util import expand_time
+from bhr.util import expand_time, ip_family
 
 # Create your tests here.
 
@@ -739,3 +739,13 @@ class UtilTest(TestCase):
 
         for text, number in cases:
             self.assertEqual(expand_time(text), number)
+
+    def test_ip_family(self):
+        cases = [
+            ('1.2.3.4', 4),
+            ('fe80::69b:c5:78a1:5ead', 6),
+        ]
+        for ip, family in cases:
+            self.assertEqual(ip_family(ip), family)
+
+        self.assertRaises(ValueError, ip_family, "banana")
