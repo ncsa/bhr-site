@@ -73,6 +73,7 @@ class DoUnblockView(FormView):
         block_ids = self.request.POST.get("block_ids").split()
         blocks = Block.objects.filter(id__in=block_ids).all()
         context["blocks"] = blocks
+        return context
 
     def form_valid(self, form):
         query = form.cleaned_data['query']
