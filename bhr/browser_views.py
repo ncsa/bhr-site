@@ -60,7 +60,7 @@ class UnblockView(View):
         block_ids = self.request.POST.getlist("block_id")
         blocks = Block.objects.filter(id__in=block_ids).all()
         block_str = " ".join(block_ids)
-        form = UnblockForm(initial={"block_id": block_str, "query": query})
+        form = UnblockForm(initial={"block_ids": block_str, "query": query})
         return render(self.request, "bhr/unblock.html", {"form": form, "blocks": blocks})
 
 class DoUnblockView(FormView):
@@ -69,7 +69,7 @@ class DoUnblockView(FormView):
 
     def form_valid(self, form):
         query = form.cleaned_data['query']
-        block_ids = form.cleaned_data['block_id'].split()
+        block_ids = form.cleaned_data['block_ids'].split()
         why = form.cleaned_data['why']
 
         block_ids = map(int, block_ids)
