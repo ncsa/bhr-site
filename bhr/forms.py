@@ -57,7 +57,7 @@ class QueryBlockForm(forms.Form):
     query = forms.CharField(max_length=50, label="CIDR or comment string", widget=forms.TextInput(attrs=AUTOFOCUS))
 
 class UnblockForm(forms.Form):
-    block_ids = forms.CharField(max_length=1000, widget=forms.HiddenInput())
+    block_id = forms.CharField(max_length=1000, widget=forms.HiddenInput())
     query = forms.CharField(max_length=30, widget=forms.HiddenInput(), required=False)
     why = forms.CharField(widget=forms.Textarea(attrs=AUTOFOCUS))
 
