@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.decorators import login_required, permission_required
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 
 from rest_framework import routers
 from bhr import views

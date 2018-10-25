@@ -56,7 +56,7 @@
               <div class="navbar-text">
                 <span class="glyphicon glyphicon-user" aria-hidden="true" ></span> {{ user.username }}
               </div>
-            <li><a href="{% url "django.contrib.auth.views.logout" %}?next={% url 'home' %}">Log Out</a></li>
+            <li><a href="{% url 'logout' %}?next={% url 'home' %}">Log Out</a></li>
           {% else %}
             <li><a href="{% url 'login' %}">Login</a></li>
           {% endif %}
