@@ -234,7 +234,7 @@ class BHRDB(object):
 
     def get_block(self, cidr):
         """Get an existing block record"""
-        return Block.expected.filter(cidr=cidr).first()
+        return Block.expected.filter(cidr=cidr).order_by('-added').first()
 
     def get_last_block(self, cidr):
         """Get most recent block record"""
