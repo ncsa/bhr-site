@@ -4,10 +4,11 @@ services:
       image: postgres
       environment:
         POSTGRES_DB: bhr
+        POSTGRES_PASSWORD: bhrtestdatabasepassword
 
     web:
       environment:
-        DATABASE_URL: postgres://postgres@db/bhr
+        DATABASE_URL: postgres://postgres:bhrtestdatabasepassword@db/bhr
       build: .
       command: python manage.py runserver 0.0.0.0:8000
       volumes:
