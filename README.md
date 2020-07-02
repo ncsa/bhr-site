@@ -83,6 +83,8 @@ And configure apache similar to examples/apache.conf
 Development
 ===========
 
+    $ docker-compose up -d db
+    $ sleep 5
     $ docker-compose run --rm web python manage.py migrate
     $ docker-compose run --rm web python manage.py createsuperuser
     $ docker-compose run --rm web python manage.py creategroups
