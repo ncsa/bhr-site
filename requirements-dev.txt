@@ -1,4 +1,4 @@
-Django==1.11.23
+Django==1.11.29
 django-netfields==0.5.3
 djangorestframework==3.9.1
 djangorestframework-csv==1.4.1
