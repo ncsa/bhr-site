@@ -583,7 +583,7 @@ class ApiTest(TestCase):
     def test_list_csv(self):
         self._add_block(duration=30)
 
-        csv_txt= self.client.get("/bhr/list.csv").content
+        csv_txt= self.client.get("/bhr/list.csv").content.decode()
 
         data = list(csv.DictReader(csv_txt.splitlines()))
 
@@ -597,7 +597,7 @@ class ApiTest(TestCase):
         sleep(.1)
         self._add_block(cidr='1.1.1.2', duration=30, why='block 2')
 
-        csv_txt = self.client.get("/bhr/list.csv").content
+        csv_txt = self.client.get("/bhr/list.csv").content.decode()
         data = list(csv.DictReader(csv_txt.splitlines()))
 
         self.assertEqual(len(data), 2)
@@ -609,7 +609,7 @@ class ApiTest(TestCase):
         self._add_block(cidr='1.1.1.3', duration=30, why='block 3')
 
         # due to the use of >= this will get the last record again
-        csv_txt = self.client.get("/bhr/list.csv", {'since': added}).content
+        csv_txt = self.client.get("/bhr/list.csv", {'since': added}).content.decode()
         data = list(csv.DictReader(csv_txt.splitlines()))
         self.assertEqual(len(data), 2)
         self.assertEqual(data[0]['why'], "block 2")
@@ -619,7 +619,7 @@ class ApiTest(TestCase):
     def test_list_csv_unicode_crap(self):
         unicode_crap = u'\u0153\u2211\xb4\xae\u2020\xa5\xa8\u02c6\xf8\u03c0\u201c\u2018'
         self._add_block(why=unicode_crap)
-        csv_txt = self.client.get("/bhr/list.csv").content
+        csv_txt = self.client.get("/bhr/list.csv").content.decode()
 
         data = list(csv.DictReader(csv_txt.splitlines()))
         self.assertEqual(len(data), 1)
@@ -722,8 +722,8 @@ class ApiTest(TestCase):
         self.assertGreater(duration, 118)
 
     def test_block_extend_True_from_infinite_does_not_replace(self):
-        print self._add_block('1.1.1.1', source='one', duration=0)
-        print self._add_block('1.1.1.1', source='one', duration=120, extend=True)
+        print(self._add_block('1.1.1.1', source='one', duration=0))
+        print(self._add_block('1.1.1.1', source='one', duration=120, extend=True))
         block = self.client.get("/bhr/api/query/1.1.1.1").data[0]
         self.assertEqual(block['unblock_at'], None)
 

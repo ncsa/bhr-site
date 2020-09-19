@@ -15,10 +15,14 @@ import time
 
 from django.conf import settings
 
-from urllib import quote
+from future.standard_library import install_aliases
+install_aliases()
+
+from urllib.parse import quote
 import logging
 
 from bhr.util import expand_time, resolve, ip_family
+from builtins import str
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +36,7 @@ class SourceBlacklistedError(Exception):
     pass
 
 def is_whitelisted(cidr):
-    cidr = ipaddress.ip_network(unicode(cidr))
+    cidr = ipaddress.ip_network(str(cidr))
     for item in WhitelistEntry.objects.all():
         if cidr[0] in item.cidr or cidr[-1] in item.cidr:
             return item
@@ -46,7 +50,7 @@ def is_prefixlen_too_small(cidr):
         minimum_prefixlen = settings.BHR.get('minimum_prefixlen', 24)
     else:
         minimum_prefixlen = settings.BHR.get('minimum_prefixlen_v6', 64)
-    cidr = ipaddress.ip_network(unicode(cidr))
+    cidr = ipaddress.ip_network(str(cidr))
     return cidr.prefixlen < minimum_prefixlen
 
 def is_source_blacklisted(source):

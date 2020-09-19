@@ -1,19 +1,29 @@
+import sys
 from django.http import HttpResponse
 import csv
-from cStringIO import StringIO
+from io import StringIO, BytesIO
+from builtins import str
 
 import socket
 
+PY3 = sys.version_info[0] == 3
+
 def clean_ascii_row(row):
-    return [c.encode('ascii','replace') if isinstance(c, basestring) else c for c in row]
+    return [c.encode('ascii','replace') if isinstance(c, str) else c for c in row]
 
 def respond_csv(lst, headers):
-    f = StringIO()
+    if PY3:
+        f = StringIO()
+    else:
+        f = BytesIO()
     writer = csv.writer(f)
     writer.writerow(headers)
 
     for row in lst:
-        writer.writerow(clean_ascii_row(row))
+        if PY3:
+            writer.writerow(row)
+        else:
+            writer.writerow(clean_ascii_row(row))
 
     return HttpResponse(f.getvalue(), content_type="text/csv")
 
