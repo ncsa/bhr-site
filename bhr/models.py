@@ -11,29 +11,33 @@ import ipaddress
 
 from django.utils import timezone
 import datetime
-import time
 
 from django.conf import settings
-
-from future.standard_library import install_aliases
-install_aliases()
 
 from urllib.parse import quote
 import logging
 
-from bhr.util import expand_time, resolve, ip_family
+from bhr.util import expand_time, ip_family
 from builtins import str
 
+from future.standard_library import install_aliases
+install_aliases()
+
+
 logger = logging.getLogger(__name__)
+
 
 class WhitelistError(Exception):
     pass
 
+
 class PrefixLenTooSmallError(Exception):
     pass
 
+
 class SourceBlacklistedError(Exception):
     pass
+
 
 def is_whitelisted(cidr):
     cidr = ipaddress.ip_network(str(cidr))
@@ -44,6 +48,7 @@ def is_whitelisted(cidr):
             return item
     return False
 
+
 def is_prefixlen_too_small(cidr):
     family = ip_family(cidr)
     if family == 4:
@@ -53,12 +58,14 @@ def is_prefixlen_too_small(cidr):
     cidr = ipaddress.ip_network(str(cidr))
     return cidr.prefixlen < minimum_prefixlen
 
+
 def is_source_blacklisted(source):
-    try :
+    try:
         entry = SourceBlacklistEntry.objects.get(source=source)
         return entry
     except ObjectDoesNotExist:
         return False
+
 
 class WhitelistEntry(models.Model):
     cidr = CidrAddressField()
@@ -66,16 +73,20 @@ class WhitelistEntry(models.Model):
     why = models.TextField()
     added = models.DateTimeField('date added', auto_now_add=True)
 
+
 class SourceBlacklistEntry(models.Model):
     source = models.CharField(max_length=30, unique=True)
     who = models.ForeignKey(User)
     why = models.TextField()
     added = models.DateTimeField('date added', auto_now_add=True)
 
+
 class CurrentBlockManager(models.Manager):
     def get_queryset(self):
         return super(CurrentBlockManager, self).get_queryset().filter(
-            id__in = BlockEntry.objects.distinct('block_id').filter(removed__isnull=True).values_list('block_id', flat=True))
+            id__in=BlockEntry.objects.distinct('block_id').filter(removed__isnull=True).values_list('block_id',
+                                                                                                    flat=True))
+
 
 class ExpectedBlockManager(models.Manager):
     def get_queryset(self):
@@ -86,6 +97,7 @@ class ExpectedBlockManager(models.Manager):
             forced_unblock=True,
         )
 
+
 class PendingBlockManager(models.Manager):
     def get_queryset(self):
         return super(PendingBlockManager, self).get_queryset().filter(
@@ -94,13 +106,18 @@ class PendingBlockManager(models.Manager):
         ).exclude(
             forced_unblock=True,
         ).exclude(
-            id__in = BlockEntry.objects.distinct('block_id').filter(removed__isnull=True).values_list('block_id', flat=True)
+            id__in=BlockEntry.objects.distinct('block_id').filter(removed__isnull=True).values_list('block_id',
+                                                                                                    flat=True)
         )
+
+
 class PendingRemovalBlockManager(models.Manager):
     def get_queryset(self):
         return super(PendingRemovalBlockManager, self).get_queryset().filter(
-            id__in = BlockEntry.objects.distinct('block_id').filter(removed__isnull=True, unblock_at__lte=timezone.now()).values_list('block_id', flat=True)
+            id__in=BlockEntry.objects.distinct('block_id').filter(removed__isnull=True, unblock_at__lte=timezone.now()
+                                                                  ).values_list('block_id', flat=True)
         ).order_by('unblock_at')
+
 
 class ExpiredBlockManager(models.Manager):
     def get_queryset(self):
@@ -109,10 +126,12 @@ class ExpiredBlockManager(models.Manager):
             Q(forced_unblock=True)
         )
 
-FLAG_NONE     = "N"
-FLAG_INBOUND  = "I"
+
+FLAG_NONE = "N"
+FLAG_INBOUND = "I"
 FLAG_OUTBOUND = "O"
-FLAG_BOTH     = "B"
+FLAG_BOTH = "B"
+
 
 class Block(models.Model):
 
@@ -124,9 +143,9 @@ class Block(models.Model):
     )
 
     cidr = CidrAddressField(db_index=True)
-    who  = models.ForeignKey(User)
+    who = models.ForeignKey(User)
     source = models.CharField(max_length=30, db_index=True)
-    why  = models.TextField()
+    why = models.TextField()
 
     added = models.DateTimeField('date added', auto_now_add=True, db_index=True)
     unblock_at = models.DateTimeField('date to be unblocked', null=True, db_index=True)
@@ -135,7 +154,7 @@ class Block(models.Model):
 
     skip_whitelist = models.BooleanField(default=False)
 
-    forced_unblock  = models.BooleanField(default=False)
+    forced_unblock = models.BooleanField(default=False)
     unblock_why = models.TextField(blank=True)
     unblock_who = models.ForeignKey(User, related_name='+', null=True, blank=True)
 
@@ -196,15 +215,16 @@ class Block(models.Model):
         BlockEntry.objects.filter(block_id=self.id).update(unblock_at=now)
         self.save()
 
+
 class BlockEntry(models.Model):
     block = models.ForeignKey(Block)
 
     ident = models.CharField("blocker ident", max_length=50, db_index=True)
 
-    added   = models.DateTimeField('date added', auto_now_add=True)
-    removed =  models.DateTimeField('date removed', null=True)
+    added = models.DateTimeField('date added', auto_now_add=True)
+    removed = models.DateTimeField('date removed', null=True)
 
-    #Denormalized from Block
+    # Denormalized from Block
     unblock_at = models.DateTimeField('date to be unblocked', null=True, db_index=True)
 
     class Meta:
@@ -216,6 +236,7 @@ class BlockEntry(models.Model):
     @classmethod
     def set_unblocked_by_id(self, id):
         BlockEntry.objects.filter(pk=id).update(removed=timezone.now())
+
 
 class BHRDB(object):
     def __init__(self):
@@ -258,16 +279,16 @@ class BHRDB(object):
 
         duration = round(duration)
 
-        #short time frame repeat offender
+        # short time frame repeat offender
         if age <= max(minimum_time_window, time_window_factor * duration):
             return penalty_time_multiplier * duration
 
-        #medium time frame repeat offender
+        # medium time frame repeat offender
         if age <= time_window_factor * return_to_base_multiplier * duration:
             return duration
 
-        #regular repeat offender
-        return duration/return_to_base_factor;
+        # regular repeat offender
+        return duration/return_to_base_factor
 
     def add_block_multi(self, who, blocks):
         created = []
@@ -277,7 +298,8 @@ class BHRDB(object):
                 created.append(b)
         return created
 
-    def add_block(self, cidr, who, source, why, duration=None, unblock_at=None, skip_whitelist=False, extend=True, autoscale=False):
+    def add_block(self, cidr, who, source, why, duration=None, unblock_at=None,
+                  skip_whitelist=False, extend=True, autoscale=False):
         if duration:
             duration = expand_time(duration)
 
@@ -306,20 +328,25 @@ class BHRDB(object):
                     duration = scaled_duration
                     unblock_at = now + datetime.timedelta(seconds=duration)
 
-            b = Block(cidr=cidr, who=who, source=source, why=why, added=now, unblock_at=unblock_at, skip_whitelist=skip_whitelist)
+            b = Block(cidr=cidr, who=who, source=source, why=why, added=now, unblock_at=unblock_at,
+                      skip_whitelist=skip_whitelist)
             b.save()
 
-            #It is possible that a block is added, and then after it expires, but before it is unblocked, a new block is added for that entry.
-            #In that case, allow the new block (since we don't know if a backend may have already unblocked the old one)
-            #but set the old record as already unblocked.  This should prevent a "block,block,unblock" timeline that results in the address
-            #ending up not actually blocked.
+            # It is possible that a block is added, and then after it expires,
+            # but before it is unblocked, a new block is added for that entry.
+            # In that case, allow the new block
+            # (since we don't know if a backend may have already unblocked the old one)
+            # but set the old record as already unblocked.
+            # This should prevent a "block,block,unblock" timeline that results in the address
+            # ending up not actually blocked.
             pending_unblock_records = BlockEntry.objects.filter(removed__isnull=True, block__cidr=cidr).all()
             for e in pending_unblock_records:
                 e.set_unblocked()
                 e.save()
 
         quoted_why = quote(why.encode('ascii', 'ignore'))
-        logger.info('BLOCK IP=%s WHO=%s SOURCE=%s WHY=%s UNTIL="%s" DURATION=%s', cidr, who, source, quoted_why, unblock_at, duration)
+        logger.info('BLOCK IP=%s WHO=%s SOURCE=%s WHY=%s UNTIL="%s" DURATION=%s', cidr, who, source, quoted_why,
+                    unblock_at, duration)
         return b
 
     def unblock_now(self, cidr, who, why):
@@ -346,24 +373,23 @@ class BHRDB(object):
 
     def block_queue(self, ident, limit=200, added_since='2014-09-01'):
         return Block.objects.raw("""
-            SELECT b.id as pk, * from bhr_block b
-            LEFT JOIN bhr_blockentry be
-            ON b.id=be.block_id AND be.ident = %s
-            WHERE
-                b.added >= %s
-            AND
-                (b.unblock_at IS NULL OR
-                 b.unblock_at > %s)
-            AND
-                b.forced_unblock is false
-            AND
-                be.added IS NULL AND be.removed is NULL
-            ORDER BY
-                b.added ASC
-            LIMIT %s """,
+                                 SELECT b.id as pk, * from bhr_block b
+                                 LEFT JOIN bhr_blockentry be
+                                 ON b.id=be.block_id AND be.ident = %s
+                                 WHERE
+                                     b.added >= %s
+                                 AND
+                                     (b.unblock_at IS NULL OR
+                                      b.unblock_at > %s)
+                                 AND
+                                     b.forced_unblock is false
+                                 AND
+                                     be.added IS NULL AND be.removed is NULL
+                                 ORDER BY
+                                     b.added ASC
+                                 LIMIT %s """,
 
-            [ident, added_since, timezone.now(), limit]
-        )
+                                 [ident, added_since, timezone.now(), limit])
 
     def unblock_queue(self, ident):
         return BlockEntry.objects.filter(
@@ -386,13 +412,13 @@ class BHRDB(object):
                 logger.info("SET_UNBLOCKED ID=%s", id)
 
     def get_history(self, query):
-        if query[0].isdigit(): #assume cidr block
+        if query[0].isdigit():  # assume cidr block
             return Block.objects.filter(cidr__in_cidr=query).select_related('who').order_by('-added')
         else:
             return Block.objects.filter(why__contains=query).select_related('who').order_by('-added')
 
     def stats(self):
-        ret = {}
+        ret = dict()
         ret['block_pending'] = self.pending().count()
         ret['unblock_pending'] = self.pending_removal().count()
         ret['current'] = self.current().count()
@@ -422,6 +448,7 @@ def filter_local_networks(query):
         q |= Q(cidr__in_cidr=n)
     return query.filter(q)
 
+
 class InCidr(models.Lookup):
     lookup_name = "in_cidr"
 
@@ -430,5 +457,6 @@ class InCidr(models.Lookup):
         rhs, rhs_params = self.process_rhs(qn, connection)
         params = lhs_params + rhs_params
         return '%s <<= %s' % (lhs, rhs), params
+
 
 models.fields.Field.register_lookup(InCidr)

@@ -1,6 +1,6 @@
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 
 
 def create_group_with_perms(group, perms):
@@ -8,6 +8,7 @@ def create_group_with_perms(group, perms):
     group, created = Group.objects.get_or_create(name=group)
     for perm in perms:
         group.permissions.add(Permission.objects.get(codename=perm))
+
 
 class Command(BaseCommand):
     help = 'Create initial BHR groups'
@@ -21,5 +22,5 @@ class Command(BaseCommand):
         for p in Permission.objects.filter(content_type__in=cts):
             bhr_group.permissions.add(p)
 
-        create_group_with_perms('BHR Block Managers', ['add_blockentry','change_blockentry'])
+        create_group_with_perms('BHR Block Managers', ['add_blockentry', 'change_blockentry'])
         create_group_with_perms('BHR Blockers', ['add_block'])

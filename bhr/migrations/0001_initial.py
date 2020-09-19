@@ -22,7 +22,8 @@ class Migration(migrations.Migration):
                 ('why', models.TextField()),
                 ('added', models.DateTimeField(auto_now_add=True, verbose_name=b'date added')),
                 ('unblock_at', models.DateTimeField(null=True, verbose_name=b'date to be unblocked')),
-                ('flag', models.CharField(default=b'N', max_length=1, choices=[(b'N', b'None'), (b'I', b'Inbound'), (b'O', b'Outbound'), (b'B', b'Both')])),
+                ('flag', models.CharField(default=b'N', max_length=1, choices=[(b'N', b'None'), (b'I', b'Inbound'),
+                                                                               (b'O', b'Outbound'), (b'B', b'Both')])),
                 ('skip_whitelist', models.BooleanField(default=False)),
                 ('forced_unblock', models.BooleanField(default=False)),
                 ('unblock_why', models.TextField(blank=True)),
@@ -60,6 +61,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='blockentry',
-            unique_together=set([('entry', 'ident')]),
+            unique_together={('entry', 'ident')},
         ),
     ]
