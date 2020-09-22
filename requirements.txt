@@ -1,7 +1,7 @@
 dj-database-url==0.4.1
-Django==1.11.29
+Django==2.2.16
 django-forms-bootstrap==3.1.0
-django-netfields==0.5.3
+django-netfields==1.2.2
 django-pglocks==1.0.2
 djangorestframework==3.9.1
 djangorestframework-csv==1.4.1
@@ -13,4 +13,3 @@ python-dateutil==2.4.2
 pytz==2018.6
 six==1.11.0
 whitenoise==3.3.0
-future

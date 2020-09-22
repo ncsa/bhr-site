@@ -1,31 +1,17 @@
-import sys
 from django.http import HttpResponse
 import csv
-from io import StringIO, BytesIO
-from builtins import str
+from io import StringIO
 
 import socket
 
-PY3 = sys.version_info[0] == 3
-
-
-def clean_ascii_row(row):
-    return [c.encode('ascii', 'replace') if isinstance(c, str) else c for c in row]
-
 
 def respond_csv(lst, headers):
-    if PY3:
-        f = StringIO()
-    else:
-        f = BytesIO()
+    f = StringIO()
     writer = csv.writer(f)
     writer.writerow(headers)
 
     for row in lst:
-        if PY3:
-            writer.writerow(row)
-        else:
-            writer.writerow(clean_ascii_row(row))
+        writer.writerow(row)
 
     return HttpResponse(f.getvalue(), content_type="text/csv")
 

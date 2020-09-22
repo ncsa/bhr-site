@@ -19,8 +19,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('source', models.CharField(unique=True, max_length=30)),
                 ('why', models.TextField()),
-                ('added', models.DateTimeField(auto_now_add=True, verbose_name=b'date added')),
-                ('who', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('added', models.DateTimeField(auto_now_add=True, verbose_name='date added')),
+                ('who', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.PROTECT)),
             ],
             options={
             },

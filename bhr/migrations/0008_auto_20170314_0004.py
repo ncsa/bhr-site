@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='block',
             name='unblock_at',
-            field=models.DateTimeField(null=True, verbose_name=b'date to be unblocked'),
+            field=models.DateTimeField(null=True, verbose_name='date to be unblocked'),
         ),
         migrations.RunSQL('CREATE INDEX bhr_block_unblocked_by ON bhr_block(unblock_who_id) WHERE unblock_who_id IS NOT NULL'),
     ]

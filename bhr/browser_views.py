@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.views.generic import View, FormView, TemplateView
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.shortcuts import render, redirect
 
 from bhr.models import Block, BHRDB, filter_local_networks

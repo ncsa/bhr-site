@@ -26,11 +26,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='block',
             name='who',
-            field=models.ForeignKey(to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.PROTECT),
         ),
         migrations.AlterField(
             model_name='whitelistentry',
             name='who',
-            field=models.ForeignKey(to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.PROTECT),
         ),
     ]

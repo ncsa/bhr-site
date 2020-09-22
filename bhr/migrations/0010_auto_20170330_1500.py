@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='block',
             name='unblock_at',
-            field=models.DateTimeField(db_index=True, null=True, verbose_name=b'date to be unblocked'),
+            field=models.DateTimeField(db_index=True, null=True, verbose_name='date to be unblocked'),
         ),
     ]

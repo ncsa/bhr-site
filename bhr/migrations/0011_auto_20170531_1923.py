@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='blockentry',
             name='removed',
-            field=models.DateTimeField(null=True, verbose_name=b'date removed'),
+            field=models.DateTimeField(null=True, verbose_name='date removed'),
         ),
         migrations.RunSQL('CREATE INDEX bhr_blockentry_removed ON bhr_blockentry(removed) WHERE removed IS NULL'),
     ]
