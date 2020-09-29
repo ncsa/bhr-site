@@ -6,6 +6,7 @@ from django.template.defaultfilters import stringfilter
 
 register = template.Library()
 
+
 @register.filter(name="resolve")
 @stringfilter
 def resolve_tag(value):

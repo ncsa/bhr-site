@@ -19,16 +19,16 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='block',
             name='unblock_at',
-            field=models.DateTimeField(null=True, verbose_name=b'date to be unblocked', db_index=True),
+            field=models.DateTimeField(null=True, verbose_name='date to be unblocked', db_index=True),
         ),
         migrations.AlterField(
             model_name='blockentry',
             name='ident',
-            field=models.CharField(max_length=50, verbose_name=b'blocker ident', db_index=True),
+            field=models.CharField(max_length=50, verbose_name='blocker ident', db_index=True),
         ),
         migrations.AlterField(
             model_name='blockentry',
             name='removed',
-            field=models.DateTimeField(null=True, verbose_name=b'date removed', db_index=True),
+            field=models.DateTimeField(null=True, verbose_name='date removed', db_index=True),
         ),
     ]

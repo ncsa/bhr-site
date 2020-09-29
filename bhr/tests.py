@@ -7,8 +7,13 @@ import ipaddress
 import json
 import csv
 
-from bhr.models import BHRDB, Block, WhitelistEntry, SourceBlacklistEntry, is_whitelisted, is_prefixlen_too_small, is_source_blacklisted, filter_local_networks
+from bhr.models import BHRDB, Block, WhitelistEntry, SourceBlacklistEntry, is_whitelisted, is_prefixlen_too_small
+from bhr.models import is_source_blacklisted, filter_local_networks
 from bhr.util import expand_time, ip_family
+
+from rest_framework import status
+from time import sleep
+
 
 # Create your tests here.
 
@@ -161,7 +166,7 @@ class DBTests(TestCase):
         self.db.unblock_now('1.2.3.4', self.user, 'testing')
         b1.refresh_from_db()
 
-        #it needs to be blocked on a host to be able to be pending unblock
+        # it needs to be blocked on a host to be able to be pending unblock
         self.db.set_blocked(b1, 'bgp1')
 
         pending_removal = self.db.pending_removal().all()
@@ -297,6 +302,7 @@ class DBTests(TestCase):
         local = filter_local_networks(self.db.expected())
         self.assertEqual(len(local), 0)
 
+
 class ScalingTests(TestCase):
     def setUp(self):
         self.db = BHRDB()
@@ -346,10 +352,6 @@ class ScalingTests(TestCase):
             expected_duration=60*60*24)
 
 
-from rest_framework.test import APITestCase
-from rest_framework import status
-from time import sleep
-
 class ApiTest(TestCase):
     def setUp(self):
         self.user = user = User.objects.create_user('admin', 'temporary@gmail.com', 'admin')
@@ -357,7 +359,7 @@ class ApiTest(TestCase):
         for perm in 'add_block change_block add_blockentry change_blockentry'.split():
             self.user.user_permissions.add(Permission.objects.get(codename=perm))
 
-    def _add_block(self, cidr='1.2.3.4', duration=30, skip_whitelist=0,source='test', extend=False, why='testing'):
+    def _add_block(self, cidr='1.2.3.4', duration=30, skip_whitelist=0, source='test', extend=False, why='testing'):
         return self.client.post('/bhr/api/block', dict(
             cidr=cidr,
             source=source,
@@ -428,7 +430,7 @@ class ApiTest(TestCase):
         data = self.client.get("/bhr/api/queue/bgp1").data
 
     def test_unblock_now(self):
-        self._add_block(cidr='1.2.3.11',why='testing unblock now')
+        self._add_block(cidr='1.2.3.11', why='testing unblock now')
 
         block = self.client.get("/bhr/api/queue/bgp1").data[0]
         self.client.post(block['set_blocked'], dict(ident='bgp1'))
@@ -521,10 +523,10 @@ class ApiTest(TestCase):
         # at first, there is noting pending or blocked, and no queue.
         check_counts(0)
 
-        #add a single block that expires in 10 seconds
+        # add a single block that expires in 10 seconds
         self._add_block(duration=3)
 
-        #verify that it shows up in expected
+        # verify that it shows up in expected
         check_counts(pending=1, expected=1)
 
         # find and block this using bgp1
@@ -545,31 +547,31 @@ class ApiTest(TestCase):
 
         check_counts(pending=0, current=1, expected=1)
 
-        #now, wait 6 seconds, and see what's up
+        # now, wait 6 seconds, and see what's up
 
         sleep(6)
 
         check_counts(pending=0, current=1, expected=0)
 
-        #now we should have some unblock queue entries
+        # now we should have some unblock queue entries
         q = self.client.get("/bhr/api/unblock_queue/bgp1").data
         self.assertEqual(len(q), 1)
 
-        #unblock it
+        # unblock it
 
         self.client.post(q[0]['set_unblocked'])
 
-        #we should still have 1 current block
+        # we should still have 1 current block
         check_counts(pending=0, current=1, expected=0)
 
-        #do the unblock for bgp2
+        # do the unblock for bgp2
         q = self.client.get("/bhr/api/unblock_queue/bgp2").data
         self.client.post(q[0]['set_unblocked'])
 
-        #now we should have 0 blocks
+        # now we should have 0 blocks
         check_counts(pending=0, current=0, expected=0)
 
-        #make sure there is nothing in the block or unblock queue for bgp1 bgp2.
+        # make sure there is nothing in the block or unblock queue for bgp1 bgp2.
         q = self.client.get("/bhr/api/queue/bgp1").data
         self.assertEqual(len(q), 0, "there should be no queue for bgp1")
         q = self.client.get("/bhr/api/unblock_queue/bgp1").data
@@ -583,7 +585,7 @@ class ApiTest(TestCase):
     def test_list_csv(self):
         self._add_block(duration=30)
 
-        csv_txt= self.client.get("/bhr/list.csv").content
+        csv_txt = self.client.get("/bhr/list.csv").content.decode()
 
         data = list(csv.DictReader(csv_txt.splitlines()))
 
@@ -597,7 +599,7 @@ class ApiTest(TestCase):
         sleep(.1)
         self._add_block(cidr='1.1.1.2', duration=30, why='block 2')
 
-        csv_txt = self.client.get("/bhr/list.csv").content
+        csv_txt = self.client.get("/bhr/list.csv").content.decode()
         data = list(csv.DictReader(csv_txt.splitlines()))
 
         self.assertEqual(len(data), 2)
@@ -609,17 +611,16 @@ class ApiTest(TestCase):
         self._add_block(cidr='1.1.1.3', duration=30, why='block 3')
 
         # due to the use of >= this will get the last record again
-        csv_txt = self.client.get("/bhr/list.csv", {'since': added}).content
+        csv_txt = self.client.get("/bhr/list.csv", {'since': added}).content.decode()
         data = list(csv.DictReader(csv_txt.splitlines()))
         self.assertEqual(len(data), 2)
         self.assertEqual(data[0]['why'], "block 2")
         self.assertEqual(data[1]['why'], "block 3")
 
-
     def test_list_csv_unicode_crap(self):
         unicode_crap = u'\u0153\u2211\xb4\xae\u2020\xa5\xa8\u02c6\xf8\u03c0\u201c\u2018'
         self._add_block(why=unicode_crap)
-        csv_txt = self.client.get("/bhr/list.csv").content
+        csv_txt = self.client.get("/bhr/list.csv").content.decode()
 
         data = list(csv.DictReader(csv_txt.splitlines()))
         self.assertEqual(len(data), 1)
@@ -641,7 +642,7 @@ class ApiTest(TestCase):
         self._add_block('1.2.3.4', duration=2)
         self._add_block('4.3.2.1', duration=2)
 
-        #as above
+        # as above
         blocks = self.client.get("/bhr/api/queue/bgp1").data
         ids = [b['id'] for b in blocks]
         data = json.dumps({"ids": ids})
@@ -650,19 +651,19 @@ class ApiTest(TestCase):
         q = self.client.get("/bhr/api/queue/bgp1").data
         self.assertEqual(len(q), 0)
 
-        #now wait...
+        # now wait...
         sleep(4)
 
-        #grab queue
+        # grab queue
         blocks = self.client.get("/bhr/api/unblock_queue/bgp1").data
         self.assertEqual(len(blocks), 2)
 
-        #send set unblocked request
+        # send set unblocked request
         ids = [b['id'] for b in blocks]
         data = json.dumps({"ids": ids})
         self.client.post("/bhr/api/set_unblocked_multi", data=data, content_type="application/json").data
 
-        #check result
+        # check result
         blocks = self.client.get("/bhr/api/unblock_queue/bgp1").data
         self.assertEqual(len(blocks), 0)
 
@@ -688,20 +689,20 @@ class ApiTest(TestCase):
         self.assertEqual(len(blocks), 2)
 
     def test_double_block_race_condition(self):
-        #Add a short block and make sure bgp1 has it as blocked
+        # Add a short block and make sure bgp1 has it as blocked
         self._add_block('1.1.1.1', source='one', duration=1)
         block = self.client.get("/bhr/api/queue/bgp1").data[0]
         self.client.post(block['set_blocked'], dict(ident='bgp1'))
         sleep(2)
 
-        #now, it should be unblocked, so we can add a new one
+        # now, it should be unblocked, so we can add a new one
         self._add_block('1.1.1.1', source='one', duration=20000)
 
-        #at this point, to ensure that the block manager won't do a A:
-        # BLOCK
-        # BLOCK
-        # UNBLOCK
-        #We need to make sure that the original record does not show up in the unblock queue.
+        # at this point, to ensure that the block manager won't do a A:
+        #  BLOCK
+        #  BLOCK
+        #  UNBLOCK
+        # We need to make sure that the original record does not show up in the unblock queue.
         blocks = self.client.get("/bhr/api/unblock_queue/bgp1").data
         self.assertEqual(len(blocks), 0)
 
@@ -722,8 +723,8 @@ class ApiTest(TestCase):
         self.assertGreater(duration, 118)
 
     def test_block_extend_True_from_infinite_does_not_replace(self):
-        print self._add_block('1.1.1.1', source='one', duration=0)
-        print self._add_block('1.1.1.1', source='one', duration=120, extend=True)
+        print(self._add_block('1.1.1.1', source='one', duration=0))
+        print(self._add_block('1.1.1.1', source='one', duration=120, extend=True))
         block = self.client.get("/bhr/api/query/1.1.1.1").data[0]
         self.assertEqual(block['unblock_at'], None)
 
@@ -736,6 +737,7 @@ class ApiTest(TestCase):
         self._add_block('1.1.1.1', source='one', duration=0, extend=True)
         block = self.client.get("/bhr/api/query/1.1.1.1").data[0]
         self.assertEqual(block['unblock_at'], None)
+
 
 class UtilTest(TestCase):
     def test_expand_time(self):
