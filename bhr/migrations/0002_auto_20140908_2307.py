@@ -18,6 +18,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='blockentry',
-            unique_together=set([('block', 'ident')]),
+            unique_together={('block', 'ident')},
         ),
     ]

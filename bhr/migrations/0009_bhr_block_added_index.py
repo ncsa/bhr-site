@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='block',
             name='added',
-            field=models.DateTimeField(auto_now_add=True, db_index=True, verbose_name=b'date added'),
+            field=models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='date added'),
         ),
     ]

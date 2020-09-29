@@ -16,7 +16,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='block',
             name='unblock_who',
-            field=models.ForeignKey(related_name=b'+', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(on_delete=models.PROTECT, related_name='+', blank=True,
+                                    to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
     ]

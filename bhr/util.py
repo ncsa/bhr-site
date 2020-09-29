@@ -1,11 +1,9 @@
 from django.http import HttpResponse
 import csv
-from cStringIO import StringIO
+from io import StringIO
 
 import socket
 
-def clean_ascii_row(row):
-    return [c.encode('ascii','replace') if isinstance(c, basestring) else c for c in row]
 
 def respond_csv(lst, headers):
     f = StringIO()
@@ -13,9 +11,10 @@ def respond_csv(lst, headers):
     writer.writerow(headers)
 
     for row in lst:
-        writer.writerow(clean_ascii_row(row))
+        writer.writerow(row)
 
     return HttpResponse(f.getvalue(), content_type="text/csv")
+
 
 time_suffixes = {
     'y':    60*60*24*365,
@@ -25,11 +24,12 @@ time_suffixes = {
     'm':    60,
     's':    1,
 }
-time_suffixes_order = 'y','mo','d','h','m','s'
+time_suffixes_order = 'y', 'mo', 'd', 'h', 'm', 's'
+
 
 def expand_time(text):
     """Convert a shorthand time notation into a value in seconds"""
-    #first see if it is already a plain number
+    # first see if it is already a plain number
     try:
         return int(text)
     except ValueError:
@@ -42,11 +42,13 @@ def expand_time(text):
 
     raise ValueError("Invalid duration %s" % text)
 
+
 def resolve(ip):
-    try :
+    try:
         return socket.gethostbyaddr(ip)[0]
     except socket.error:
         return ''
+
 
 def ip_family(address):
     """Return the ip family for the address

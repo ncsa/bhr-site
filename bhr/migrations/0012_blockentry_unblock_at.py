@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='blockentry',
             name='unblock_at',
-            field=models.DateTimeField(db_index=True, null=True, verbose_name=b'date to be unblocked'),
+            field=models.DateTimeField(db_index=True, null=True, verbose_name='date to be unblocked'),
             preserve_default=False,
         ),
         migrations.RunSQL('''UPDATE bhr_blockentry

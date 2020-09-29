@@ -4,9 +4,13 @@ from django.contrib import admin
 from bhr.models import WhitelistEntry, SourceBlacklistEntry, Block, BlockEntry
 from bhr.forms import BlockForm, AddSourceBlacklistForm
 
+
 def force_unblock(modeladmin, request, queryset):
     queryset.update(forced_unblock=True)
+
+
 force_unblock.short_description = "Force Unblock"
+
 
 class BlockStatusListFilter(admin.SimpleListFilter):
     title = "status"
@@ -20,7 +24,8 @@ class BlockStatusListFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         if self.value() == "current":
             return queryset.filter(
-                id__in = BlockEntry.objects.distinct('block_id').filter(removed__isnull=True).values_list('block_id', flat=True))
+                id__in=BlockEntry.objects.distinct('block_id').filter(removed__isnull=True).values_list('block_id',
+                                                                                                        flat=True))
 
 
 class AutoWho(admin.ModelAdmin):
@@ -28,6 +33,7 @@ class AutoWho(admin.ModelAdmin):
         if getattr(obj, 'who', None) is None:
             obj.who = request.user
         obj.save()
+
 
 class BlockAdmin(AutoWho):
     date_hierarchy = 'added'
@@ -37,15 +43,18 @@ class BlockAdmin(AutoWho):
 
     form = BlockForm
 
+
 class WhitelistAdmin(AutoWho):
     date_hierarchy = 'added'
     list_filter = ('who', )
     list_display = ('cidr', 'who', 'why')
 
+
 class SourceBlacklistAdmin(AutoWho):
     list_display = ('source', 'who', 'why')
 
     form = AddSourceBlacklistForm
+
 
 admin.site.register(SourceBlacklistEntry, SourceBlacklistAdmin)
 admin.site.register(WhitelistEntry, WhitelistAdmin)
