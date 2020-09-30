@@ -766,3 +766,24 @@ class UtilTest(TestCase):
             self.assertEqual(ip_family(ip), family)
 
         self.assertRaises(ValueError, ip_family, "banana")
+
+
+class WebUITest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user('admin', 'temporary@gmail.com', 'admin')
+
+    @override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.StaticFilesStorage')
+    def test_login_get(self):
+        response = self.client.get('/accounts/login/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    @override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.StaticFilesStorage')
+    def test_login_post(self):
+        response = self.client.post('/accounts/login/', {'username': 'admin', 'password': 'admin'})
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+    @override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.StaticFilesStorage')
+    def test_login_post_invalid_password(self):
+        response = self.client.post('/accounts/login/', {'username': 'admin', 'password': 'admin2'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
