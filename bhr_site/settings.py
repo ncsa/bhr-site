@@ -188,6 +188,6 @@ try:
     LOCAL_SETTINGS
 except NameError:
     try:
-        from settings_local import *
+        from .settings_local import *
     except ImportError:
         pass
