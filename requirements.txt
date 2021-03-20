@@ -3,7 +3,7 @@ Django==2.2.16
 django-forms-bootstrap==3.1.0
 django-netfields==1.2.2
 django-pglocks==1.0.2
-djangorestframework==3.9.1
+djangorestframework==3.11.2
 djangorestframework-csv==1.4.1
 gunicorn==19.5.0
 ipaddress==1.0.22
